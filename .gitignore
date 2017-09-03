@@ -1,2 +1,5 @@
 *.o
 *.swp
+
+# Don't include built binaries. They're large.
+build/*
