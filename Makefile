@@ -1,7 +1,7 @@
 FLAGS=-Wall -g
 
 build: etree.o main.o
-	g++ $(FLAGS) -o etree main.o proto.o
+	g++ $(FLAGS) -o etree main.o etree.o
 run: etree
 	./etree
 etree.o: etree.cpp

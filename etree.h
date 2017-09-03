@@ -49,7 +49,15 @@ namespace et{
  * y.val; // outputs 20. It's already evaluated by eval(z)! 
  */
 class var{
+public:
+    // ctor: loads in val, no children.
+    var(double val);
+    // copy ctor: loads in val, deep copies children.
+    var(const var& rhs);
     
+    // assignment op: does a shallow copy of children.
+    var& operator=(const var& rhs);
+private: 
     // Current support for operators:
     // operator+
     // operator-
