@@ -1,0 +1,29 @@
+cxxflags = -g -Wall -std=c++14 -I. 
+cflags = -g -Wall -std=c99 -I. 
+lflags =  -lm -lstdc++ -lc
+libs = 
+rule cxx
+  command = g++ $cxxflags -c $in -o $out
+rule cc
+  command = gcc $cflags -c $in -o $out
+rule cl
+  command = gcc -o $out $in $libs $lflags
+rule ocb
+  command = objcopy -O binary $in $out
+rule cdb
+  command = ninja -t compdb cc cxx > cc_preexp.json
+rule cdb_e
+  command = cat cc_preexp.json | ./expand_compdb.py > compile_commands.json
+rule cscf
+  command = find . -regex ".*\(\.c\|\.h\|.cpp\|.hpp\)$$" -and -not -type d $
+      > $out
+rule cscdb
+  command = cscope -bq
+build cc_preexp.json: cdb
+build compile_commands.json: cdb_e cc_preexp.json
+build cscope.files: cscf
+build cscope.in.out cscope.po.out cscope.out: cscdb cscope.files
+build ./etree.o: cxx ./etree.cpp
+build ./main.o: cxx ./main.cpp
+build main.elf: cl ./etree.o ./main.o
+build main.bin: ocb main.elf
