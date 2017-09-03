@@ -56,7 +56,7 @@ public:
     var(const var& rhs);
     
     // Access the current value of the node.
-    double value(){ return val; };
+    double value() const{ return val; };
 
     // assignment op: does a shallow copy of children.
     // this way, the following expressions:
@@ -65,8 +65,9 @@ public:
     // `z = 10.5`
     // `z = some_matrix_type()`
     // ... will be valid during evaluation.
-    template <typename T>
-    var& operator=(const T& rhs);
+    // TODO: TEMPORARILY TURNED OFF FOR NOW
+    // template <typename T>
+    // var& operator=(const T& rhs);
 
     // ~ Binary Operators ~
     // These are the most important operator
@@ -116,8 +117,8 @@ private:
 // Inline definitions of templated functions:
 
 // Explicit specialization:
-var operator+(const var& lhs, const var& rhs){
-    return var(lhs.val + rhs.val);
+inline var operator+(const var& lhs, const var& rhs){
+    return var(lhs.value() + rhs.value());
 }
 
 template <typename T>
@@ -129,5 +130,6 @@ template <typename T>
 var operator+(const T& lhs, const var& rhs){
     return var(rhs.val + lhs);
 }
+
 
 }

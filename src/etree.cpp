@@ -10,6 +10,9 @@ var::var(const var& rhs){
         // recursively copy all children.
         children.push_back( m_child );
     };
+    
+    // copy value
+    val = rhs.val;
 };
 
 }
