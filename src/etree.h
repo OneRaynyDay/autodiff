@@ -55,8 +55,33 @@ public:
     // copy ctor: loads in val, deep copies children.
     var(const var& rhs);
     
+    // Access the current value of the node.
+    double value(){ return val; };
+
     // assignment op: does a shallow copy of children.
-    var& operator=(const var& rhs);
+    // this way, the following expressions:
+    // `z = x + y` 
+    // `z = 10`
+    // `z = 10.5`
+    // `z = some_matrix_type()`
+    // ... will be valid during evaluation.
+    template <typename T>
+    var& operator=(const T& rhs);
+
+    // ~ Binary Operators ~
+    // These are the most important operator
+    // overloading functions for our use case.
+    // These are _globally defined_ operator overloads.
+    //
+    // NOTE: Only make them friend if you _absolutely_
+    // need to access private members! 
+    // friend var operator+(const var& lhs, const var& rhs);
+    friend var operator+(const var& lhs, const var& rhs);
+    template <typename T>
+    friend var operator+(const var& lhs, const T& rhs);
+    template <typename T>
+    friend var operator+(const T& lhs, const var& rhs);
+
 private: 
     // Current support for operators:
     // operator+
@@ -85,7 +110,24 @@ private:
     // A child c_i is a child if the expression E containing
     // c_i and current node v evaluates c_i before v
     // is evaluated.
-    std::vector<std::shared_ptr<var> > children; 
+    std::vector<var> children; 
 };
+
+// Inline definitions of templated functions:
+
+// Explicit specialization:
+var operator+(const var& lhs, const var& rhs){
+    return var(lhs.val + rhs.val);
+}
+
+template <typename T>
+var operator+(const var& lhs, const T& rhs){
+    return var(lhs.val + rhs);
+}
+
+template <typename T>
+var operator+(const T& lhs, const var& rhs){
+    return var(rhs.val + lhs);
+}
 
 }

@@ -1,12 +1,12 @@
-FLAGS=-Wall -g
+FLAGS=-Wall -g -Wc++11-extensions -std=c++11
 
-build: etree.o main.o
-	g++ $(FLAGS) -o etree main.o etree.o
-run: etree
-	./etree
-etree.o: etree.cpp
-	g++ -c etree.cpp 
+build: build/etree.o build/main.o
+	g++ $(FLAGS) -o build/etree build/main.o build/etree.o
+run: build/etree
+	build/etree
+etree.o: src/etree.cpp
+	g++ $(FLAGS) -c src/etree.cpp build/etree.o
 main.o:	main.cpp
-	g++ -c main.cpp
+	g++ $(FLAGS) -c src/main.cpp build/main.o
 clean:
-	rm etree.o main.o etree
+	rm build/* 
