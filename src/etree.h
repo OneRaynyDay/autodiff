@@ -13,6 +13,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <utility>
 
 namespace et{
 
@@ -96,7 +97,7 @@ public:
     // ctor: loads in operator, and children. Note: children is an rvalue pass.
     var(op_type, std::vector<std::shared_ptr<var>>&&);
     // copy ctor: loads in val, shallow copies children.
-    var(const var&) = default;
+    // var(const var&) = default;
     
     // Access the current value of the node.
     double getValue() const{ return val; };
@@ -111,9 +112,7 @@ public:
     // `z = 10.5`
     // `z = some_matrix_type()`
     // ... will be valid during evaluation.
-    var& operator=(const var& rhs) = default;
-    template <typename T>
-    var& operator=(const T& rhs);
+    // var& operator=(const var& rhs) = default;
 
     // ~ Binary Operators ~
     // These are the most important operator
@@ -127,6 +126,11 @@ public:
     // NOTE: Only make them friend if you _absolutely_
     // need to access private members! 
     friend var operator+(const var& lhs, const var& rhs);
+    friend var operator-(const var& lhs, const var& rhs);
+    friend var operator*(const var& lhs, const var& rhs);
+    friend var operator/(const var& lhs, const var& rhs);
+    friend var exp(const var&);
+    friend var poly(const var&, double power);
 
 private: 
         
@@ -149,26 +153,36 @@ private:
     std::vector<std::shared_ptr<var> > children;
 };
 
-// Inline definitions of operator=:
-template <typename T>
-inline var& var::operator=(const T& rhs){
-    val = rhs;
-    return *this;
-};
-
 // Inline definitions of templated functions:
-template <typename L, typename R>
-var binary_generator(const L& lhs, const R& rhs){
-    return var(var::op_type::plus,
-                std::vector<std::shared_ptr<var> > {
-                    std::make_shared<var>(lhs),
-                    std::make_shared<var>(rhs)
-                } 
-              );
+template <typename... V>
+var pack_expression(var::op_type op, const V&... args){
+    return var(op,
+               std::vector<std::shared_ptr<var> > {
+                   std::make_shared<var>(args)...,
+               });
 }
 
 inline var operator+(const var& lhs, const var& rhs){
-    return binary_generator(lhs, rhs);
+    return pack_expression(var::op_type::plus, lhs, rhs);
 }
 
+inline var operator-(const var& lhs, const var& rhs){
+    return pack_expression(var::op_type::minus, lhs, rhs);
+}
+
+inline var operator*(const var& lhs, const var& rhs){
+    return pack_expression(var::op_type::multiply, lhs, rhs);
+}
+
+inline var operator/(const var& lhs, const var& rhs){
+    return pack_expression(var::op_type::divide, lhs, rhs);
+}
+
+inline var exp(const var& v){
+    return pack_expression(var::op_type::exponent, v);
+}
+
+inline var poly(const var& v, double power){
+    return pack_expression(var::op_type::polynomial, v, power);
+}
 }

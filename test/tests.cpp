@@ -7,20 +7,31 @@
 #include "catch.hpp"
 #include "../src/etree.h"
 
+#define NEW_CASE std::cout<<"======="<<std::endl;
+#define NEW_SEC  std::cout<<"-------"<<std::endl;
 
-// TEST_CASE( "et::var can be initialized. (In different ways)", "[et::var::var]" ) {
-    // et::var x(10);
-    // REQUIRE(x.getValue() == 10);
-//
-    // SECTION( "et::var can be initialized via copying." ) {
-        // et::var y(x);
-        // REQUIRE(y.getValue() == 10);
-    // }
-// }
+TEST_CASE( "et::var can be initialized. (In different ways)", "[et::var::var]" ) {
+    NEW_CASE
+    et::var x(10);
+    REQUIRE(x.getValue() == 10);
+
+    SECTION( "et::var can be initialized via copying." ) {
+        NEW_SEC
+        et::var y(x);
+        REQUIRE(y.getValue() == 10);
+    }
+
+    SECTION( "et::var can be initialized via operator=." ) {
+        NEW_SEC
+        et::var y = 3;
+        REQUIRE(y.getValue() == 3);
+    }
+}
+
 
 TEST_CASE( "et::var can be added.", "[et::var::operator+]" ) {
     et::var x(10), y(20);
-    
+
     SECTION( "Add 2 et::vars." ){
         et::var a(8), b(2), c(12), d(8);
         et::var x = a + b;
@@ -30,7 +41,7 @@ TEST_CASE( "et::var can be added.", "[et::var::operator+]" ) {
         REQUIRE(z.getChildren().size() == 2);
 
         SECTION( "Require that the members are the same. (Not copied)"){
-            REQUIRE(z.getChildren()[0]->getChildren()[0].get() == 
+            REQUIRE(z.getChildren()[0]->getChildren()[0].get() ==
                     x.getChildren()[0].get());
             REQUIRE(z.getChildren()[0]->getChildren()[0]->getValue() == 8);
             REQUIRE(z.getChildren()[1]->getChildren()[1]->getValue() == 8);

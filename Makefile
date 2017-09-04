@@ -4,6 +4,7 @@ build: etree.o main.o
 	g++ $(FLAGS) -o build/main build/main.o build/etree.o
 test: etree.o tests.o
 	g++ $(FLAGS) -o build/tests build/tests.o build/etree.o
+	build/tests
 run_main: build/main
 	build/main
 run_tests: build/tests
