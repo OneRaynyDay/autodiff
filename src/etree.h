@@ -1,7 +1,19 @@
 #pragma once
 
+// Macros for debugging
+#define DEBUG
+
+#ifdef DEBUG
+ #define D if(1) 
+#else
+ #define D if(0) 
+#endif
+// enddebug
+
+#include <iostream>
 #include <vector>
 #include <memory>
+
 namespace et{
 
 /** 
@@ -48,42 +60,20 @@ namespace et{
  *
  * y.val; // outputs 20. It's already evaluated by eval(z)! 
  */
-class var{
+
+template<typename T>
+struct noisy
+{
+	noisy& operator=(noisy&&) noexcept { std::cout << "operator=(noisy<" << typeid(T).name() << ">&&)\n"; return *this; }
+	noisy& operator=(const noisy&) { std::cout << "operator=(const noisy<" << typeid(T).name() << ">&)\n"; return *this; }
+	noisy(const noisy&) { std::cout << "noisy(const noisy<" << typeid(T).name() << ">&)\n"; }
+	noisy(noisy&&) noexcept { std::cout << "noisy(noisy<" << typeid(T).name() << ">&&)\n"; }
+	~noisy() { std::cout << "~noisy<" << typeid(T).name() << ">()\n"; }
+	noisy() { std::cout << "noisy<" << typeid(T).name() << ">()\n"; }
+};
+
+class var : noisy<var>{
 public:
-    // ctor: loads in val, no children.
-    var(double val);
-    // copy ctor: loads in val, deep copies children.
-    var(const var& rhs);
-    
-    // Access the current value of the node.
-    double value() const{ return val; };
-
-    // assignment op: does a shallow copy of children.
-    // this way, the following expressions:
-    // `z = x + y` 
-    // `z = 10`
-    // `z = 10.5`
-    // `z = some_matrix_type()`
-    // ... will be valid during evaluation.
-    // TODO: TEMPORARILY TURNED OFF FOR NOW
-    // template <typename T>
-    // var& operator=(const T& rhs);
-
-    // ~ Binary Operators ~
-    // These are the most important operator
-    // overloading functions for our use case.
-    // These are _globally defined_ operator overloads.
-    //
-    // NOTE: Only make them friend if you _absolutely_
-    // need to access private members! 
-    // friend var operator+(const var& lhs, const var& rhs);
-    friend var operator+(const var& lhs, const var& rhs);
-    template <typename T>
-    friend var operator+(const var& lhs, const T& rhs);
-    template <typename T>
-    friend var operator+(const T& lhs, const var& rhs);
-
-private: 
     // Current support for operators:
     // operator+
     // operator-
@@ -91,45 +81,94 @@ private:
     // operator/
     // exp() // e^x
     // poly() // x^n
-    enum operators{
+    enum op_type {
         plus,
         minus,
         multiply,
         divide,
         exponent,
-        polynomial
+        polynomial,
+        none // no operators. leaf.
     };
+
+    // ctor: loads in val, no children.
+    var(double);
+    // ctor: loads in operator, and children. Note: children is an rvalue pass.
+    var(op_type, std::vector<std::shared_ptr<var>>&&);
+    // copy ctor: loads in val, shallow copies children.
+    var(const var&) = default;
     
+    // Access the current value of the node.
+    double getValue() const{ return val; };
+    std::vector<std::shared_ptr<var>> getChildren() const{
+        return children; 
+    }
+
+    // assignment op: does a _shallow_ copy of children.
+    // this way, the following expressions:
+    // `z = x + y` 
+    // `z = 10`
+    // `z = 10.5`
+    // `z = some_matrix_type()`
+    // ... will be valid during evaluation.
+    var& operator=(const var& rhs) = default;
+    template <typename T>
+    var& operator=(const T& rhs);
+
+    // ~ Binary Operators ~
+    // These are the most important operator
+    // overloading functions for our use case.
+    // These are _globally defined_ operator overloads.
+    //
+    // Implementation details:
+    // - Currently is _lazily evaluated_.
+    //  - The reasoning is "create once, evaluate often".
+    //
+    // NOTE: Only make them friend if you _absolutely_
+    // need to access private members! 
+    friend var operator+(const var& lhs, const var& rhs);
+
+private: 
+        
     // The value that the variable currently holds.
     // Currently only supports double.
     // In the future template and type promotion should be
     // taken into consideration.
     double val;
 
+    // The operator associated with this variable.
+    // For example, `z = x + y` will have z contain
+    // an op value of var::op::plus
+    op_type op; 
+
     // The children of the current variable.
     // A children is defined by the following:
     // A child c_i is a child if the expression E containing
     // c_i and current node v evaluates c_i before v
     // is evaluated.
-    std::vector<var> children; 
+    std::vector<std::shared_ptr<var> > children;
+};
+
+// Inline definitions of operator=:
+template <typename T>
+inline var& var::operator=(const T& rhs){
+    val = rhs;
+    return *this;
 };
 
 // Inline definitions of templated functions:
+template <typename L, typename R>
+var binary_generator(const L& lhs, const R& rhs){
+    return var(var::op_type::plus,
+                std::vector<std::shared_ptr<var> > {
+                    std::make_shared<var>(lhs),
+                    std::make_shared<var>(rhs)
+                } 
+              );
+}
 
-// Explicit specialization:
 inline var operator+(const var& lhs, const var& rhs){
-    return var(lhs.value() + rhs.value());
+    return binary_generator(lhs, rhs);
 }
-
-template <typename T>
-var operator+(const var& lhs, const T& rhs){
-    return var(lhs.val + rhs);
-}
-
-template <typename T>
-var operator+(const T& lhs, const var& rhs){
-    return var(rhs.val + lhs);
-}
-
 
 }
