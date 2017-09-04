@@ -11,24 +11,21 @@
 #define NEW_SEC  std::cout<<"-------"<<std::endl;
 
 TEST_CASE( "et::var can be initialized. (In different ways)", "[et::var::var]" ) {
-    NEW_CASE
     et::var x(10);
     REQUIRE(x.getValue() == 10);
 
     SECTION( "et::var can be initialized via copying." ) {
-        NEW_SEC
         et::var y(x);
         REQUIRE(y.getValue() == 10);
     }
 
     SECTION( "et::var can be initialized via operator=." ) {
-        NEW_SEC
         et::var y = 3;
         REQUIRE(y.getValue() == 3);
     }
 }
 
-
+// TODO: Support unit tests for EACH operator.
 TEST_CASE( "et::var can be added.", "[et::var::operator+]" ) {
     et::var x(10), y(20);
 
@@ -64,10 +61,25 @@ TEST_CASE( "et::var can be added.", "[et::var::operator+]" ) {
 
         REQUIRE(z.getChildren().size() == 2);
 
-
         SECTION( "Require that the members are the same. (Not copied)"){
             REQUIRE(z.getChildren()[0].get()->getValue() == 20);
             REQUIRE(z.getChildren()[1].get()->getValue() == 15);
+        }
+    }
+}
+
+TEST_CASE( "et::var can be exponentiated.", "[et::var::exp]" ) {
+    et::var y(10);
+    et::var x = y + 10;
+
+    SECTION( "Exponentiate an et::var." ){
+        et::var z = et::exp(x);
+        REQUIRE(z.getChildren().size() == 1);
+
+        SECTION( "Require that the members are the same. (Not copied)" ){
+            REQUIRE(z.getChildren()[0]->getChildren()[0].get() ==
+                    x.getChildren()[0].get());
+            REQUIRE(z.getChildren()[0]->getChildren()[0]->getValue() == 10);
         }
     }
 }
