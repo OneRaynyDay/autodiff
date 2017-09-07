@@ -18,37 +18,27 @@ namespace et{
  * - et::eval()
  * - et::back()
  */
-class expression {
+class expression : noisy<expression> {
 public:
     expression(var);
 
+    var getRoot() const;
+
     // Searches for the leaves of the DAG.
     // returns in a std::vector to evaluate for later.
-    std::vector<var> findSource();
+    std::vector<var> findLeaves();
+
+    // Recursively evaluates the tree.
+    // This may have memory issues if the stack size is significant.
+    double propagate();
+    
+    // Uses the given leaves, possibly from findSource(),
+    // and performs a bottom-up evaluation of the tree
+    // from the leaves.
+    double propagate(const std::vector<var>& leaves);
+    
 private:
     var root;
 };
-
-expression::expression(var _root) : root(_root){}
-
-std::vector<var> expression::findSource(){
-    std::vector<var> leaves;
-    std::queue<var> q;
-    q.push(root);
-
-    while(!q.empty()){
-        var v = q.front();
-        if(!v.getChildren().size())
-            leaves.push_back(v);
-        else{
-            std::vector<var> children = v.getChildren();
-            for(const var& v : children){
-                q.push(v);
-            }
-        }
-        q.pop();
-    }
-    return leaves;
-}
 
 }

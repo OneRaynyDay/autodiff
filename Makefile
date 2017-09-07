@@ -22,7 +22,7 @@ var-test: test/var-test.cpp main-test.o
 		test/var-test.cpp \
 		src/var.cpp \
 		-o build/var-test
-etree-test: test/etree-test.cpp main-test.o
+etree-test: test/etree-test.cpp src/etree.cpp src/var.cpp main-test.o
 	g++ $(FLAGS) build/main-test.o \
 		test/etree-test.cpp \
 		src/etree.cpp \
@@ -35,4 +35,4 @@ main.o: src/main.cpp
 
 # CLEAN/DIST
 clean:
-	rm build/* 
+	rm -rf build/* 

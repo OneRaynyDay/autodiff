@@ -16,9 +16,18 @@
 #include <utility>
 
 namespace et{
-
+// forward declare class var
 class var;
-typedef std::shared_ptr<var> vsp;
+}
+
+namespace std{
+// Template specialize hash for vars
+template <> struct hash<et::var> {
+    size_t operator()(const et::var&) const;
+};
+}
+
+namespace et{
 
 // Current support for operators:
 // operator+
@@ -69,7 +78,7 @@ struct noisy
  * y.val; // outputs 20. It's already evaluated by eval(z)! 
  */
 
-class var : noisy<var> {
+class var {
 // Forward declaration
 struct impl;
 
@@ -92,11 +101,22 @@ public:
     // deep copyable
     var clone();
     
-    // Access the current value of the node.
+    // Access/Modify the current node value
     double getValue() const;
-    const std::vector<var>& getChildren() const;
+    void setValue(double);
+    op_type getOp() const;
+    void setOp(op_type);
+    
+    // Access internals (no modify)
+    std::vector<var> getChildren() const;
+    std::vector<var> getParents() const;
     long getUseCount() const;
 
+    // Comparison for hash
+    bool operator==(const var& rhs) const;
+    friend struct std::hash<var>;
+
+    // Arithmetic expressions
     template <typename... V>
     friend var pack_expression(op_type, V&...);
 
@@ -134,6 +154,7 @@ public:
     std::vector<var> children;
 
     // TODO: Currently the API supports pointing weak_ptrs.
+    // This way, we won't have the issue with shared_ptr loops.
     // We should devise a cleaner way to do this if possible.
     std::vector<std::weak_ptr<impl>> parents;
 };
@@ -173,9 +194,10 @@ inline var exp(var v){
     return pack_expression(op_type::exponent, v);
 }
 
-inline var poly(var v, double power){
+inline var poly(var v, var power){
     var p(power);
     return pack_expression(op_type::polynomial, v, p);
 }
 
 }
+

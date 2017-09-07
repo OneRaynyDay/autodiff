@@ -33,7 +33,43 @@ TEST_CASE( "et::var can be initialized. (In different ways)", "[et::var::var]" )
     }
 }
 
-// // TODO: Support unit tests for EACH operator.
+// TEST_CASE( "et::var's set/get functions work.", "[et::var::get*/set*]" ){
+    // SECTION( "et::var get/setValue()" ){
+        // et::var x(10);
+        // REQUIRE(x.getValue() == 10);
+        // x.setValue(3);
+        // REQUIRE(x.getValue() == 3);
+    // }
+//
+    // SECTION( "et::var get/setOp()" ){
+        // et::var x(10);
+        // REQUIRE(x.getOp() == et::op_type::none);
+        // x.setOp(et::op_type::polynomial);
+        // REQUIRE(x.getOp() == et::op_type::polynomial);
+    // }
+//
+    // SECTION( "et::var getChildren/Parents()" ){
+        // et::var a(1),b(3),c(2),d(4);
+        // et::var x = a + b;
+        // et::var y = c + d;
+        // et::var z = x + y;
+        // et::var w = y + 5;
+        // z.setValue(0.5);
+        // w.setValue(0.2);
+        // std::vector<et::var> children = y.getChildren();
+        // std::vector<et::var> parents = y.getParents();
+//
+        // REQUIRE(children.size() == 2);
+        // REQUIRE(children[0].getValue() == 2);
+        // REQUIRE(children[1].getValue() == 4);
+//
+        // REQUIRE(parents.size() == 2);
+        // REQUIRE(parents[0].getValue() == 0.5);
+        // REQUIRE(parents[1].getValue() == 0.2);
+    // }
+// }
+
+// TODO: Support unit tests for EACH operator.
 TEST_CASE( "et::var can be added.", "[et::var::operator+]" ) {
     et::var x(10), y(20);
 
