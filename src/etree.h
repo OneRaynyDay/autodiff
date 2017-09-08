@@ -18,7 +18,7 @@ namespace et{
  * - et::eval()
  * - et::back()
  */
-class expression : noisy<expression> {
+class expression {
 public:
     expression(var);
 

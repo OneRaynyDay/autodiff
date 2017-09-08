@@ -1,6 +1,21 @@
 #include "var.h"
+#include <map>
 
 namespace et{
+/* enum find */
+
+int numOpArgs(op_type op){
+    static const std::map<op_type, int> op_args = {
+        { op_type::plus, 2 },
+        { op_type::minus, 2 },
+        { op_type::multiply, 2 },
+        { op_type::divide, 2 },
+        { op_type::exponent, 1 },
+        { op_type::polynomial, 1 },
+        { op_type::none, 0 },
+    };
+    return op_args.find(op)->second;
+};
 
 /* et::var default funcs: */
 

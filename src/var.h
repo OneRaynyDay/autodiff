@@ -46,6 +46,8 @@ enum class op_type {
     none // no operators. leaf.
 };
 
+int numOpArgs(op_type op);
+
 // A genius debugging tool, made by milleniumbug.
 template<typename T>
 struct noisy
@@ -78,7 +80,7 @@ struct noisy
  * y.val; // outputs 20. It's already evaluated by eval(z)! 
  */
 
-class var : noisy<var> {
+class var {
 // Forward declaration
 struct impl;
 

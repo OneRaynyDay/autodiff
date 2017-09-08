@@ -2,6 +2,7 @@
 #include <cmath>
 #include <exception>
 #include <unordered_map>
+#include <iostream>
 
 namespace et{
 
@@ -72,18 +73,36 @@ double expression::propagate(){
 // Currently, we wrap around the vars, and add a field
 // that tracks how many occurences of its children we found.
 //
-// Currently, we will have an unordered_map that maps to each var.
-// For any node that "finished exploration", we will look to its parent
-// and increment the count. If the parents count has incremented, then
-// we will add the parent into the queue.
-//
-// We will rely on a lemma: If we have all the leaves, topologically sorting
-// WILL yield the next round of nodes.
-double expression::propagate(const std::vector<var>&){
+// Pseudocode:
+// suppose q has all the leaves, and m contains <var, int>
+// while q not empty:
+//     v = q.pop
+//     evaluate v
+//     for parent in v.parents:
+//         m[parent]++
+//         if m[parent] has sufficient nums:
+//             q.add(parent)
+//     
+// return root.val
+
+double expression::propagate(const std::vector<var>& leaves){
+    std::queue<var> q;
     std::unordered_map<var, int> explored; 
-    /* TODO for(const var& v : leaves){
-        
-    } */ 
+    for(const var& v : leaves)
+        q.push(v);
+
+    while(!q.empty()){
+        var v = q.front();
+        q.pop();
+        std::vector<var> parents = v.getParents();
+        for(var& parent : parents){
+            explored[parent]++; 
+            if(numOpArgs(parent.getOp()) == explored[parent]){
+                parent.setValue(_eval(parent.getOp(), parent.getChildren()));
+                q.push(parent);
+            }
+        } 
+    } 
     return root.getValue();
 }
 
