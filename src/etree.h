@@ -46,7 +46,6 @@ public:
 
     // Computes the derivative for the entire graph.
     // Performs a top-down evaluation of the tree.
-    //
     void backpropagate(std::unordered_map<var, double>& leaves);
     
 private:

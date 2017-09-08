@@ -150,4 +150,21 @@ TEST_CASE( "et::expression can find the derivatives.", "[et::expression::propaga
         REQUIRE(m[a] == std::exp(3));
         REQUIRE(m[b] == -1);
     }
+
+    SECTION( "et::expression evaluates sigmoid(a)" ) {
+        et::var a(3);
+        et::var root = 1/(1+et::exp(-1*a));
+        et::expression exp(root);
+
+        std::unordered_map<et::var, double> m = {
+            { a, 0 },
+        };
+        exp.propagate();
+        exp.backpropagate(m);
+        double sigm = 1/(1+std::exp(-3));
+        double grad = sigm * (1-sigm);
+        // precision is an issue here. So we make sure
+        // that the diff in value isn't too large.
+        REQUIRE(m[a]-grad < 1e-10);
+    }
 }
