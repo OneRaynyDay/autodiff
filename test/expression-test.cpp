@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "../src/etree.h"
+#include "../src/expression.h"
 #include <cmath>
 
 #define NEW_CASE std::cout<<"======="<<std::endl;

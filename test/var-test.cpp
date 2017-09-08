@@ -139,12 +139,10 @@ TEST_CASE( "et::var can be exponentiated.", "[et::var::exp]" ) {
     et::var x = y + 10;
 
     SECTION( "Exponentiate an et::var." ){
-        NEW_SEC
         et::var z = et::exp(x);
         REQUIRE(z.getChildren().size() == 1);
 
         SECTION( "Require that the members are the same. (Not copied)" ){
-            NEW_SEC
             REQUIRE(z.getChildren()[0].getChildren()[0].getUseCount() == 2);
             REQUIRE(z.getChildren()[0].getChildren()[0].getValue() == 10);
         }

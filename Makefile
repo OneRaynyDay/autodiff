@@ -1,18 +1,18 @@
 FLAGS=-Wall -g -Wc++11-extensions -std=c++11
 
 # RUN
-build: etree.o main.o var.o
-	g++ $(FLAGS) -o build/main build/main.o build/var.o build/etree.o
+build: expression.o main.o var.o
+	g++ $(FLAGS) -o build/main build/main.o build/var.o build/expression.o
 	build/main
-test: var-test etree-test
+test: var-test expression-test
 	build/var-test
-	build/etree-test
+	build/expression-test
 
 # SRC BUILD
 var.o: src/var.cpp
 	g++ $(FLAGS) -c src/var.cpp -o build/var.o
-etree.o: src/etree.cpp
-	g++ $(FLAGS) -c src/etree.cpp -o build/etree.o
+expression.o: src/expression.cpp
+	g++ $(FLAGS) -c src/expression.cpp -o build/expression.o
 
 # TEST BUILD
 main-test.o: test/main-test.cpp
@@ -22,12 +22,12 @@ var-test: test/var-test.cpp main-test.o
 		test/var-test.cpp \
 		src/var.cpp \
 		-o build/var-test
-etree-test: test/etree-test.cpp src/etree.cpp src/var.cpp main-test.o
+expression-test: test/expression-test.cpp src/expression.cpp src/var.cpp main-test.o
 	g++ $(FLAGS) build/main-test.o \
-		test/etree-test.cpp \
-		src/etree.cpp \
+		test/expression-test.cpp \
+		src/expression.cpp \
 		src/var.cpp \
-		-o build/etree-test
+		-o build/expression-test
 
 # MAIN BUILD
 main.o: src/main.cpp
