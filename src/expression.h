@@ -32,7 +32,7 @@ public:
     /** TODO: discussion:
      * Do we really need propagate()? Can the user just
      * evaluate it forward themselves, and update the leaves
-     * with appropriate values?
+     * with appropriate values? Could be faster.
      */
 
     // Recursively evaluates the tree.

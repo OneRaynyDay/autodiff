@@ -1,8 +1,6 @@
 #include "expression.h"
 #include <cmath>
 #include <exception>
-#include <iostream>
-#include <cassert>
 
 namespace et{
 
