@@ -78,7 +78,7 @@ struct noisy
  * y.val; // outputs 20. It's already evaluated by eval(z)! 
  */
 
-class var {
+class var : noisy<var> {
 // Forward declaration
 struct impl;
 
@@ -108,7 +108,16 @@ public:
     void setOp(op_type);
     
     // Access internals (no modify)
-    std::vector<var> getChildren() const;
+    
+    // We return by reference because we do not
+    // want to increase the shared_ptr count.
+    // (Even though it's innocuous so far)
+    std::vector<var>& getChildren() const;
+
+    // We return by copy here because we want
+    // to let the user know that the shared_ptr
+    // count is increased for the duration that
+    // the parents are held.
     std::vector<var> getParents() const;
     long getUseCount() const;
 

@@ -27,10 +27,15 @@ var::var(op_type _op, const std::vector<var>& _children)
 
 /* getters and setters */
 double var::getValue() const{ return pimpl->val; }
+
 void var::setValue(double _val){ pimpl->val = _val; }
+
 op_type var::getOp() const{ return pimpl->op; }
+
 void var::setOp(op_type _op){ pimpl->op = _op; }
-std::vector<var> var::getChildren() const{ return pimpl->children; }
+
+std::vector<var>& var::getChildren() const{ return pimpl->children; }
+
 std::vector<var> var::getParents() const{
     std::vector<var> _parents;
     for( std::weak_ptr<impl> parent : pimpl->parents ){
@@ -38,13 +43,13 @@ std::vector<var> var::getParents() const{
     } 
     return _parents;
 }
+
 long var::getUseCount() const{
     return pimpl.use_count();
 }
 
 /* hash/comparisons */
 bool var::operator==(const var& rhs) const{ return pimpl.get() == rhs.pimpl.get(); }
-
 
 /* et::var::impl funcs: */
 var::impl::impl(double _val) : val(_val), op(op_type::none){}
