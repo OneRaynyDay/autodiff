@@ -2,6 +2,7 @@
 
 #include "var.h"
 #include <queue>
+#include <unordered_map>
 
 namespace et{
 /**
@@ -28,6 +29,12 @@ public:
     // returns in a std::vector to evaluate for later.
     std::vector<var> findLeaves();
 
+    /** TODO: discussion:
+     * Do we really need propagate()? Can the user just
+     * evaluate it forward themselves, and update the leaves
+     * with appropriate values?
+     */
+
     // Recursively evaluates the tree.
     // This may have memory issues if the stack size is significant.
     double propagate();
@@ -36,6 +43,11 @@ public:
     // and performs a bottom-up evaluation of the tree
     // from the leaves.
     double propagate(const std::vector<var>& leaves);
+
+    // Computes the derivative for the entire graph.
+    // Performs a top-down evaluation of the tree.
+    //
+    void backpropagate(std::unordered_map<var, double>& leaves);
     
 private:
     var root;

@@ -98,3 +98,56 @@ TEST_CASE( "et::expression can evaluate an expression *ITERATIVELY*.", "[et::exp
         REQUIRE(exp.propagate(exp.findLeaves()) == val);
     }
 }
+
+
+TEST_CASE( "et::expression can find the derivatives.", "[et::expression::propagate]") {
+    SECTION( "et::expression evaluates a+b+c+d" ) {
+        et::var a(10), b(5), c(15), d(2);
+        et::var root = (a + b) + (c + d);
+        et::expression exp(root);
+        std::unordered_map<et::var, double> m = {
+            { a, 0 },
+            { b, 0 },
+            { c, 0 },
+            { d, 0 }
+        };
+        exp.propagate();
+        exp.backpropagate(m);
+
+        REQUIRE(m[a] == 1);
+        REQUIRE(m[b] == 1);
+        REQUIRE(m[c] == 1);
+        REQUIRE(m[d] == 1);
+    }
+
+    SECTION( "et::expression evaluates poly(a,b)/c" ) {
+        et::var a(2), b(3), c(8);
+        et::var root = et::poly(a,b) / c;
+        et::expression exp(root);
+        std::unordered_map<et::var, double> m = {
+            { a, 0 },
+            { b, 0 },
+            { c, 0 },
+        };
+        exp.propagate();
+        exp.backpropagate(m);
+        REQUIRE(m[a] == (12.0/8));
+        REQUIRE(m[b] == 0);
+        REQUIRE(m[c] == (-8.0)/(64));
+    }
+
+    SECTION( "et::expression evaluates exp(a) - b" ) {
+        et::var a(3), b(2.5);
+        et::var root = et::exp(a) - b;
+        et::expression exp(root);
+
+        std::unordered_map<et::var, double> m = {
+            { a, 0 },
+            { b, 0 },
+        };
+        exp.propagate();
+        exp.backpropagate(m);
+        REQUIRE(m[a] == std::exp(3));
+        REQUIRE(m[b] == -1);
+    }
+}
