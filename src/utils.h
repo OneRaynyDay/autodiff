@@ -1,3 +1,5 @@
+#pragma once
+
 #include "expression.h"
 
 namespace et{
@@ -11,7 +13,13 @@ namespace et{
 // input a specific flag into the functions.
 // The user _should not_ have to know the internals.
 
-double eval(const var&);
+// Provides an interface for the et::expression evaluation
+// pipeline. This is to abstract away the construction of
+// an expression and choose the method of evaluation.
+double eval(var& v, bool iter);
 
-std::unordered_map<var, double> back(const var&, std::unordered_map<var, double>&);
+// Provides an interface for the et::expression backprop
+// pipeline.
+void back(const var&, std::unordered_map<var, double>&);
+
 }
