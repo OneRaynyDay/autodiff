@@ -151,6 +151,21 @@ TEST_CASE( "et::expression can find the derivatives.", "[et::expression::propaga
         REQUIRE(m[b] == -1);
     }
 
+    SECTION( "et::expression evaluates a*exp(a) - b" ) {
+        et::var a(3), b(2.5);
+        et::var root = a*et::exp(a) - b;
+        et::expression exp(root);
+
+        std::unordered_map<et::var, double> m = {
+            { a, 0 },
+            { b, 0 },
+        };
+        exp.propagate();
+        exp.backpropagate(m);
+        REQUIRE(m[a] == std::exp(3) + std::exp(3)*3);
+        REQUIRE(m[b] == -1);
+    }
+
     SECTION( "et::expression evaluates sigmoid(a)" ) {
         et::var a(3);
         et::var root = 1/(1+et::exp(-1*a));

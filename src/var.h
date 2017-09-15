@@ -128,15 +128,10 @@ public:
     friend struct std::hash<var>;
 
     // Arithmetic expressions
+    // We expose this friend purely because we don't want to expose the pimpl
+    // using functions. We shouldn't be using friends often.
     template <typename... V>
-    friend var pack_expression(op_type, V&...);
-
-    friend var operator+(var lhs, var rhs);
-    friend var operator-(var lhs, var rhs);
-    friend var operator*(var lhs, var rhs);
-    friend var operator/(var lhs, var rhs);
-    friend var exp(var);
-    friend var poly(var, double power);
+    friend const var pack_expression(op_type, V&...);
 private: 
     // PImpl idiom requires forward declaration of the class:
     std::shared_ptr<impl> pimpl;
@@ -172,7 +167,7 @@ public:
 
 // Inline definitions of templated functions:
 template <typename... V>
-var pack_expression(op_type op, V&... args){
+const var pack_expression(op_type op, V&... args){
     std::vector<std::shared_ptr<var::impl> > vimpl = { args.pimpl... };
     std::vector<var> v;
     for(const std::shared_ptr<var::impl>& _impl : vimpl){
@@ -185,27 +180,27 @@ var pack_expression(op_type op, V&... args){
     return res;
 }
 
-inline var operator+(var lhs, var rhs){
+inline const var operator+(var lhs, var rhs){
     return pack_expression(op_type::plus, lhs, rhs);
 }
 
-inline var operator-(var lhs, var rhs){
+inline const var operator-(var lhs, var rhs){
     return pack_expression(op_type::minus, lhs, rhs);
 }
 
-inline var operator*(var lhs, var rhs){
+inline const var operator*(var lhs, var rhs){
     return pack_expression(op_type::multiply, lhs, rhs);
 }
 
-inline var operator/(var lhs, var rhs){
+inline const var operator/(var lhs, var rhs){
     return pack_expression(op_type::divide, lhs, rhs);
 }
 
-inline var exp(var v){
+inline const var exp(var v){
     return pack_expression(op_type::exponent, v);
 }
 
-inline var poly(var v, var power){
+inline const var poly(var v, var power){
     var p(power);
     return pack_expression(op_type::polynomial, v, p);
 }
