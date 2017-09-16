@@ -67,7 +67,9 @@ long var::getUseCount() const{
 bool var::operator==(const var& rhs) const{ return pimpl.get() == rhs.pimpl.get(); }
 
 /* et::var::impl funcs: */
-var::impl::impl(double _val) : val(_val), op(op_type::none){}
+var::impl::impl(double _val) : 
+    val(_val), 
+    op(op_type::none){}
 
 var::impl::impl(op_type _op, const std::vector<var>& _children)
 : op(_op) {

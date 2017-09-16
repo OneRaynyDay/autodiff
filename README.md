@@ -81,30 +81,28 @@ The variables that are constant are usually rvalues, aka directly defined and re
 
 However, we can't directly restrict rvalues, or else gradient may not flow back at all.
 
-Therefore, we will define a specific operator overload on variables, so that we can restrict BFS:
+This should be handled by the `et::expression` class, which will map the variables to the const-ness.
+
+By default the variables are not const. 
+We'll add to an unordered_set of variables that are non-const via bottom-up tree search.
+
+Here's an example of using the optimized version:
 
 ```c++
-var x(10);
+et::var x(10), y(20), z(5);
 
-// The operation below creates 2 rvalue variables:
-// 1. 10 becomes var(10).
-//    This can be const-qualified, since we don't care about its value.
-// 2. (x+10) becomes var(_, {x, var(10)}). 
-//    This needs to be kept because x is an lvalue.
-// 
-// And creates 2 lvalue variables:
-// 1. x is previously defined.
-// 2. (x+10)/2 is the result, and is assigned z. 
+std::unordered_map<et::var, double> args {
+    {x,0},
+    {y,0},
+    {z,0}
+};
 
-var z = (x + 10)/2;
+et::eval(x); // returns a number
+(x + y); // returns a var
+(y + z * 5); // returns a var
+final = (3 + x^2 - 1); // returns a var
+
+et::eval(final); // returns a number
+auto dx = et::back(final, x); // returns the gradient with respect to x, is a et::var
+et::back(final, args); // fills the std::map<etc::var, etc::var> m{ {x, dx}, {y, dy}, {z, dz} };
 ```
-
-In the above example, we should not calculate the derivative of `var(10)`, 
-but we should calculate `var(x+10)`.
-
-The heuristic is thus:
-
-1. Any rvalue `var` input into an `f()` operation will be considered `const`-qualified.
-2. as long as `f()` is an operation on purely `const`-qualified inputs, 
-it will output a `const`-qualified variable.
-

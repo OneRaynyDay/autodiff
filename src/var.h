@@ -143,7 +143,7 @@ public:
     // Or allow to enter operation and children(parent)
     impl(double);
     impl(op_type, const std::vector<var>&);
-    
+
     // The value that the variable currently holds.
     // Currently only supports double.
     // In the future template and type promotion should be
@@ -180,6 +180,11 @@ const var pack_expression(op_type op, V&... args){
     return res;
 }
 
+// We need const-ness in returns here to prevent things like:
+// a + b = c; which is obviously dumb
+
+// One problem is the overloading - it's a PITA. We need
+// |{var&, var&&}^N| many overloads where N is the # of inputs.
 inline const var operator+(var lhs, var rhs){
     return pack_expression(op_type::plus, lhs, rhs);
 }

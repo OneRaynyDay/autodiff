@@ -1,6 +1,7 @@
 #pragma once
 
 #include "expression.h"
+#include <set>
 
 namespace et{
 
@@ -20,6 +21,11 @@ double eval(var& v, bool iter);
 
 // Provides an interface for the et::expression backprop
 // pipeline.
-void back(const var&, std::unordered_map<var, double>&);
+
+enum class back_flags {
+    const_qualify
+};
+
+void back(const var&, std::unordered_map<var, double>&, std::set<back_flags> flags = {});
 
 }

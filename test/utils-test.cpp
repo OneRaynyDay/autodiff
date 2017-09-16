@@ -22,3 +22,16 @@ TEST_CASE("et::back can back propagate.", "[et::back]"){
     
     REQUIRE(m[x] - ((3.0/4)*std::exp(7.5*0.5 + 2.5)) < 1e-10);
 }
+
+TEST_CASE("et::back can back propagate with nonconstqualify optimize.", "[et::back]"){
+    et::var x(0.5);
+    et::var fx = et::poly(et::exp(3*x + 1), 2.5)/10 + 10;
+    std::unordered_map<et::var, double> m = {
+        { x, 0 },
+    };
+
+    et::eval(fx, true);
+    et::back(fx, m, {et::back_flags::const_qualify});
+    
+    REQUIRE(m[x] - ((3.0/4)*std::exp(7.5*0.5 + 2.5)) < 1e-10);
+}
