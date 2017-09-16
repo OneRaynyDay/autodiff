@@ -18,7 +18,6 @@ et::eval(x); // returns a number
 final = (3 + x^2 - 1); // returns a var
 
 et::eval(final); // returns a number
-auto dx = et::back(final, x); // returns the gradient with respect to x, is a et::var
 et::back(final, args); // fills the std::map<etc::var, etc::var> m{ {x, dx}, {y, dy}, {z, dz} };
 ```
 
@@ -103,6 +102,5 @@ et::eval(x); // returns a number
 final = (3 + x^2 - 1); // returns a var
 
 et::eval(final); // returns a number
-auto dx = et::back(final, x); // returns the gradient with respect to x, is a et::var
-et::back(final, args); // fills the std::map<etc::var, etc::var> m{ {x, dx}, {y, dy}, {z, dz} };
+et::back(final, args, {et::back_flags::const_qualify}); // fills the std::map<etc::var, etc::var> m{ {x, dx}, {y, dy}, {z, dz} };
 ```
