@@ -1,18 +1,12 @@
 #pragma once
-
-// Macros for debugging
-#define DEBUG
-
-#ifdef DEBUG
- #define D if(1) 
-#else
- #define D if(0) 
-#endif
-// enddebug
+#include <eigen3/Eigen/Dense>
 #include <iostream>
 #include <vector>
 #include <memory>
 #include <utility>
+
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
 
 namespace et{
 // forward declare class var
@@ -33,6 +27,16 @@ enum class op_type {
     exponent,
     polynomial,
     none // no operators. leaf.
+};
+
+// Current support for values:
+// scalar - double precision
+// vector - double precision
+// matrix - double precision
+enum class term_type {
+    scalar,
+    vector,
+    matrix
 };
 
 int numOpArgs(op_type op);
@@ -86,8 +90,13 @@ struct impl;
 public:
     // For initialization of new vars by ptr
     var(std::shared_ptr<impl>);
-
+    
+    // The 3 acceptable constructors. We only allow
+    // scalar/vector/matrix for now.
     var(double);
+    var(VectorXd);
+    var(MatrixXd);
+    
     var(op_type, const std::vector<var>&);
     ~var();
 
@@ -147,12 +156,16 @@ public:
     // Currently only supports double.
     // In the future template and type promotion should be
     // taken into consideration.
+    // std::shared_ptr<void> val;
     double val;
 
     // The operator associated with this variable.
     // For example, `z = x + y` will have z contain
     // an op value of var::op::plus
     op_type op; 
+
+    // The value associated with this variable.
+    term_type term;
 
     // The children of the current variable, 
     // i.e. which variables make up this variable.
