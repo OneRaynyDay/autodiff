@@ -9,7 +9,6 @@
  #define D if(0) 
 #endif
 // enddebug
-
 #include <iostream>
 #include <vector>
 #include <memory>
@@ -18,16 +17,6 @@
 namespace et{
 // forward declare class var
 class var;
-}
-
-namespace std{
-// Template specialize hash for vars
-template <> struct hash<et::var> {
-    size_t operator()(const et::var&) const;
-};
-}
-
-namespace et{
 
 // Current support for operators:
 // operator+
@@ -48,6 +37,16 @@ enum class op_type {
 
 int numOpArgs(op_type op);
 
+}
+
+namespace std{
+// Template specialize hash for vars
+template <> struct hash<et::var> {
+    size_t operator()(const et::var&) const;
+};
+}
+
+namespace et{
 // A genius debugging tool, made by milleniumbug.
 template<typename T>
 struct noisy
@@ -183,8 +182,6 @@ const var pack_expression(op_type op, V&... args){
 // We need const-ness in returns here to prevent things like:
 // a + b = c; which is obviously dumb
 
-// One problem is the overloading - it's a PITA. We need
-// |{var&, var&&}^N| many overloads where N is the # of inputs.
 inline const var operator+(var lhs, var rhs){
     return pack_expression(op_type::plus, lhs, rhs);
 }
