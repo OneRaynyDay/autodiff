@@ -6,29 +6,29 @@
 
 TEST_CASE( "et::var can be initialized. (In different ways)", "[et::var::var]" ) {
     et::var x(10);
-    REQUIRE(x.getValue() == 10);
+    REQUIRE(x.getValue<double>() == 10);
 
     SECTION( "et::var can be initialized via move copying." ) {
         et::var y(et::var(3));
-        REQUIRE(y.getValue() == 3);
+        REQUIRE(y.getValue<double>() == 3);
         REQUIRE(y.getUseCount() == 1);
     }
 
     SECTION( "et::var can be initialized via shallow copying." ){
         et::var y(x);
-        REQUIRE(y.getValue() == 10);
+        REQUIRE(y.getValue<double>() == 10);
         REQUIRE(y.getUseCount() == 2);
     }
 
     SECTION( "et::var can be initialized via deep copying." ){
         et::var y = x.clone();
-        REQUIRE(y.getValue() == 10);
+        REQUIRE(y.getValue<double>() == 10);
         REQUIRE(y.getUseCount() == 1);
     }
 
     SECTION( "et::var can be initialized via move operator=." ) {
         et::var y = 3;
-        REQUIRE(y.getValue() == 3);
+        REQUIRE(y.getValue<double>() == 3);
         REQUIRE(y.getUseCount() == 1);
     }
 }
@@ -36,9 +36,9 @@ TEST_CASE( "et::var can be initialized. (In different ways)", "[et::var::var]" )
 TEST_CASE( "et::var's set/get functions work.", "[et::var::get*/set*]" ){
     SECTION( "et::var get/setValue()" ){
         et::var x(10);
-        REQUIRE(x.getValue() == 10);
+        REQUIRE(x.getValue<double>() == 10);
         x.setValue(3);
-        REQUIRE(x.getValue() == 3);
+        REQUIRE(x.getValue<double>() == 3);
     }
 
     SECTION( "et::var get/setOp()" ){
@@ -58,8 +58,8 @@ TEST_CASE( "et::var's set/get functions work.", "[et::var::get*/set*]" ){
         w.setValue(0.2);
         std::vector<et::var> children = y.getChildren();
         REQUIRE(children.size() == 2);
-        REQUIRE(children[0].getValue() == 2);
-        REQUIRE(children[1].getValue() == 4);
+        REQUIRE(children[0].getValue<double>() == 2);
+        REQUIRE(children[1].getValue<double>() == 4);
         REQUIRE(x.getUseCount() == 2);
         REQUIRE(z.getUseCount() == 1);
         REQUIRE(w.getUseCount() == 1);
@@ -67,8 +67,8 @@ TEST_CASE( "et::var's set/get functions work.", "[et::var::get*/set*]" ){
             std::vector<et::var> parents = y.getParents();
 
             REQUIRE(parents.size() == 2);
-            REQUIRE(parents[0].getValue() == 0.5);
-            REQUIRE(parents[1].getValue() == 0.2);
+            REQUIRE(parents[0].getValue<double>() == 0.5);
+            REQUIRE(parents[1].getValue<double>() == 0.2);
             REQUIRE(z.getUseCount() == 2);
             REQUIRE(w.getUseCount() == 2);
         }
@@ -95,8 +95,8 @@ TEST_CASE( "et::var can be added.", "[et::var::operator+]" ) {
         }
 
         SECTION( "Require that the members are the same. (Not copied)" ){
-            REQUIRE(z.getChildren()[0].getChildren()[0].getValue() == 8);
-            REQUIRE(z.getChildren()[1].getChildren()[1].getValue() == 8);
+            REQUIRE(z.getChildren()[0].getChildren()[0].getValue<double>() == 8);
+            REQUIRE(z.getChildren()[1].getChildren()[1].getValue<double>() == 8);
         }
     }
 
@@ -106,8 +106,8 @@ TEST_CASE( "et::var can be added.", "[et::var::operator+]" ) {
         REQUIRE(z.getChildren().size() == 2);
 
         SECTION( "Require that the members are the same. (Not copied)"){
-            REQUIRE(z.getChildren()[0].getValue() == 15);
-            REQUIRE(z.getChildren()[1].getValue() == 10);
+            REQUIRE(z.getChildren()[0].getValue<double>() == 15);
+            REQUIRE(z.getChildren()[1].getValue<double>() == 10);
         }
     }
 
@@ -117,8 +117,8 @@ TEST_CASE( "et::var can be added.", "[et::var::operator+]" ) {
         REQUIRE(z.getChildren().size() == 2);
 
         SECTION( "Require that the members are the same. (Not copied)"){
-            REQUIRE(z.getChildren()[0].getValue() == 20);
-            REQUIRE(z.getChildren()[1].getValue() == 15);
+            REQUIRE(z.getChildren()[0].getValue<double>() == 20);
+            REQUIRE(z.getChildren()[1].getValue<double>() == 15);
         }
     }
 
@@ -128,8 +128,8 @@ TEST_CASE( "et::var can be added.", "[et::var::operator+]" ) {
             return (a+b)+(c+d);
         };
         et::var x = get_vars();
-        REQUIRE(x.getChildren()[0].getChildren()[0].getValue() == 1);
-        REQUIRE(x.getChildren()[1].getChildren()[1].getValue() == 3);
+        REQUIRE(x.getChildren()[0].getChildren()[0].getValue<double>() == 1);
+        REQUIRE(x.getChildren()[1].getChildren()[1].getValue<double>() == 3);
         REQUIRE(x.getChildren()[1].getChildren()[1].getUseCount() == 1);
     }
 }
@@ -144,7 +144,7 @@ TEST_CASE( "et::var can be exponentiated.", "[et::var::exp]" ) {
 
         SECTION( "Require that the members are the same. (Not copied)" ){
             REQUIRE(z.getChildren()[0].getChildren()[0].getUseCount() == 2);
-            REQUIRE(z.getChildren()[0].getChildren()[0].getValue() == 10);
+            REQUIRE(z.getChildren()[0].getChildren()[0].getValue<double>() == 10);
         }
     }
 

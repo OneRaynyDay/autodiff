@@ -33,10 +33,12 @@ enum class op_type {
 // scalar - double precision
 // vector - double precision
 // matrix - double precision
+// none - not yet evaluated
 enum class term_type {
     scalar,
     vector,
-    matrix
+    matrix,
+    none // no term_type has yet been declared yet.
 };
 
 int numOpArgs(op_type op);
@@ -94,8 +96,8 @@ public:
     // The 3 acceptable constructors. We only allow
     // scalar/vector/matrix for now.
     var(double);
-    var(VectorXd);
-    var(MatrixXd);
+    explicit var(VectorXd);
+    explicit var(MatrixXd);
     
     var(op_type, const std::vector<var>&);
     ~var();
@@ -112,8 +114,13 @@ public:
     var clone();
     
     // Access/Modify the current node value
-    double getValue() const;
+    template <typename T>
+    T getValue() const;
+    
     void setValue(double);
+    void setValue(const VectorXd&);
+    void setValue(const MatrixXd&);
+    
     op_type getOp() const;
     void setOp(op_type);
     
@@ -129,6 +136,8 @@ public:
     // count is increased for the duration that
     // the parents are held.
     std::vector<var> getParents() const;
+
+    term_type getTermType() const;
     long getUseCount() const;
 
     // Comparison for hash
@@ -150,14 +159,16 @@ public:
     // Either allow to enter a value(leaf)
     // Or allow to enter operation and children(parent)
     impl(double);
+    impl(VectorXd);
+    impl(MatrixXd);
+
     impl(op_type, const std::vector<var>&);
 
     // The value that the variable currently holds.
-    // Currently only supports double.
-    // In the future template and type promotion should be
-    // taken into consideration.
-    // std::shared_ptr<void> val;
-    double val;
+    // Currently implemented as an std::shared_ptr<void>.
+    // Before anyone screams injustice, this choice was
+    // taken under much discussion.
+    std::shared_ptr<void> val;
 
     // The operator associated with this variable.
     // For example, `z = x + y` will have z contain
@@ -178,6 +189,10 @@ public:
 };
 
 // Inline definitions of templated functions:
+
+template <typename T>
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+
 template <typename... V>
 const var pack_expression(op_type op, V&... args){
     std::vector<std::shared_ptr<var::impl> > vimpl = { args.pimpl... };

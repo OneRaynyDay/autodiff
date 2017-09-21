@@ -34,16 +34,33 @@ var var::clone(){
 /* et::var funcs: */
 var::var(std::shared_ptr<impl> _pimpl) : pimpl(_pimpl){};
 
+// Ctor
 var::var(double _val) 
-: pimpl(new impl(_val)){}
+: pimpl(std::make_shared<impl>(_val)){}
+var::var(VectorXd _val)
+: pimpl(std::make_shared<impl>(_val)){}
+var::var(MatrixXd _val)
+: pimpl(std::make_shared<impl>(_val)){}
 
 var::var(op_type _op, const std::vector<var>& _children)
-: pimpl(new impl(_op, _children)){}
+: pimpl(std::make_shared<impl>(_op, _children)){}
 
 /* getters and setters */
-double var::getValue() const{ return pimpl->val; }
 
-void var::setValue(double _val){ pimpl->val = _val; }
+void var::setValue(double _val) { 
+    pimpl->val = std::make_shared<double>(_val); 
+    pimpl->term = term_type::scalar; 
+}
+
+void var::setValue(const VectorXd& _val) { 
+    pimpl->val = std::make_shared<VectorXd>(_val); 
+    pimpl->term = term_type::vector; 
+}
+
+void var::setValue(const MatrixXd& _val) { 
+    pimpl->val = std::make_shared<MatrixXd>(_val); 
+    pimpl->term = term_type::matrix; 
+}
 
 op_type var::getOp() const{ return pimpl->op; }
 
@@ -68,11 +85,20 @@ bool var::operator==(const var& rhs) const{ return pimpl.get() == rhs.pimpl.get(
 
 /* et::var::impl funcs: */
 var::impl::impl(double _val) : 
-    val(_val), 
-    op(op_type::none){}
+    val(std::make_shared<double>(_val)), 
+    op(op_type::none),
+    term(term_type::scalar){}
+var::impl::impl(VectorXd _val) : 
+    val(std::make_shared<VectorXd>(_val)), 
+    op(op_type::none),
+    term(term_type::vector){}
+var::impl::impl(MatrixXd _val) : 
+    val(std::make_shared<MatrixXd>(_val)), 
+    op(op_type::none),
+    term(term_type::matrix){}
 
 var::impl::impl(op_type _op, const std::vector<var>& _children)
-: op(_op) {
+: op(_op), term(term_type::none) {
     for(const var& v : _children){
         children.emplace_back(v.pimpl);
     }

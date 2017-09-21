@@ -7,8 +7,13 @@ namespace et{
 // Helper function for recursive propagation
 double _eval(op_type op, const std::vector<var>& operands){
     switch(op){
-        case op_type::plus:
+        case op_type::plus:{
+            switch(operands[0].getTermType()){
+                case term_type::scalar:
+                   // TODO REST HERE 
+            }            
             return operands[0].getValue() + operands[1].getValue();
+        }
         case op_type::minus:
             return operands[0].getValue() - operands[1].getValue();
         case op_type::multiply:
