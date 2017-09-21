@@ -2,8 +2,6 @@
 
 namespace et{
 
-
-
 double eval(var& root, bool iter){
     expression exp(root);
     if(iter)
