@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <utility>
+#include <boost/variant.hpp>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -85,19 +86,19 @@ struct noisy
  * y.val; // outputs 20. It's already evaluated by eval(z)! 
  */
 
+
 class var {
 // Forward declaration
 struct impl;
 
 public:
+    typedef boost::variant<double, VectorXd, MatrixXd> term_t;
     // For initialization of new vars by ptr
     var(std::shared_ptr<impl>);
     
     // The 3 acceptable constructors. We only allow
     // scalar/vector/matrix for now.
-    var(double);
-    explicit var(VectorXd);
-    explicit var(MatrixXd);
+    var(term_t);
     
     var(op_type, const std::vector<var>&);
     ~var();
@@ -114,13 +115,12 @@ public:
     var clone();
     
     // Access/Modify the current node value
-    template <typename T>
+    term_t getValue() const;
+    template<typename T> 
     T getValue() const;
     
-    void setValue(double);
-    void setValue(const VectorXd&);
-    void setValue(const MatrixXd&);
-    
+    void setValue(term_t);
+
     op_type getOp() const;
     void setOp(op_type);
     
@@ -158,9 +158,7 @@ struct var::impl{
 public:
     // Either allow to enter a value(leaf)
     // Or allow to enter operation and children(parent)
-    impl(double);
-    impl(VectorXd);
-    impl(MatrixXd);
+    impl(var::term_t);
 
     impl(op_type, const std::vector<var>&);
 
@@ -168,7 +166,9 @@ public:
     // Currently implemented as an std::shared_ptr<void>.
     // Before anyone screams injustice, this choice was
     // taken under much discussion.
-    std::shared_ptr<void> val;
+    std::shared_ptr<term_t> val;
+    
+
 
     // The operator associated with this variable.
     // For example, `z = x + y` will have z contain
@@ -189,9 +189,8 @@ public:
 };
 
 // Inline definitions of templated functions:
-
 template <typename T>
-T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+T var::getValue() const { return boost::get<T>(pimpl->val); }
 
 template <typename... V>
 const var pack_expression(op_type op, V&... args){
