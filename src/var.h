@@ -98,6 +98,15 @@ public:
     
     // The 3 acceptable constructors. We only allow
     // scalar/vector/matrix for now.
+    //we need these wrapper constructors to allow for operations like
+    //var x = 1; var m = MatrixXd; because these constructors will be
+    //implicitely invoked followed by a move constructors
+    //in reality we will be casting these to term_t but compiler can't
+    //directly
+    var(double);
+    var(VectorXd);
+    var(MatrixXd);
+    
     var(term_t);
     
     var(op_type, const std::vector<var>&);
