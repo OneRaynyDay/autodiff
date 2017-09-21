@@ -42,10 +42,10 @@ var::var(op_type _op, const std::vector<var>& _children)
 : pimpl(std::make_shared<impl>(_op, _children)){}
 
 /* getters and setters */
-var::term_t var::getValue() const { return *(pimpl->val); }
+var::term_t var::getValue() const { return pimpl->val; }
 
 void var::setValue(var::term_t _val) { 
-    pimpl->val = std::make_shared<var::term_t>(_val); 
+    pimpl->val = _val; 
 }
 
 op_type var::getOp() const{ return pimpl->op; }
@@ -71,7 +71,7 @@ bool var::operator==(const var& rhs) const{ return pimpl.get() == rhs.pimpl.get(
 
 /* et::var::impl funcs: */
 var::impl::impl(var::term_t _val): 
-    val(std::make_shared<term_t>(_val)),
+    val(_val),
     op(op_type::none){}
 
 var::impl::impl(op_type _op, const std::vector<var>& _children)

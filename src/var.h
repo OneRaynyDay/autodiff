@@ -166,7 +166,7 @@ public:
     // Currently implemented as an std::shared_ptr<void>.
     // Before anyone screams injustice, this choice was
     // taken under much discussion.
-    std::shared_ptr<term_t> val;
+    term_t val;
     
 
 

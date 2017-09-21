@@ -1,0 +1,17 @@
+[
+    {
+        "command": "g++ -g -Wall -std=c++14 -I.  -c etree.cpp -o etree.o", 
+        "directory": "/home/minh/Projects/autodiff", 
+        "file": "etree.cpp"
+    }, 
+    {
+        "command": "g++ -g -Wall -std=c++14 -I.  -c main.cpp -o main.o", 
+        "directory": "/home/minh/Projects/autodiff", 
+        "file": "main.cpp"
+    }, 
+    {
+        "command": "g++ -g -Wall -std=c++14 -I.  -c etree.h.h -o etree.h.o", 
+        "directory": "/home/minh/Projects/autodiff", 
+        "file": "etree.h"
+    }
+]

@@ -1,0 +1,118 @@
+src/expression.cpp:12:40: error: label at end of compound statement: expected statement
+                case term_type::scalar:
+                                       ^
+                                        ;
+src/expression.cpp:11:32: warning: enumeration values 'vector', 'matrix', and 'none' not handled in switch [-Wswitch]
+            switch(operands[0].getTermType()){
+                               ^
+src/expression.cpp:15:32: error: no matching member function for call to 'getValue'
+            return operands[0].getValue() + operands[1].getValue();
+                   ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:15:57: error: no matching member function for call to 'getValue'
+            return operands[0].getValue() + operands[1].getValue();
+                                            ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:18:32: error: no matching member function for call to 'getValue'
+            return operands[0].getValue() - operands[1].getValue();
+                   ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:18:57: error: no matching member function for call to 'getValue'
+            return operands[0].getValue() - operands[1].getValue();
+                                            ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:20:32: error: no matching member function for call to 'getValue'
+            return operands[0].getValue() * operands[1].getValue();
+                   ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:20:57: error: no matching member function for call to 'getValue'
+            return operands[0].getValue() * operands[1].getValue();
+                                            ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:22:32: error: no matching member function for call to 'getValue'
+            return operands[0].getValue() / operands[1].getValue();
+                   ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:22:57: error: no matching member function for call to 'getValue'
+            return operands[0].getValue() / operands[1].getValue();
+                                            ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:24:41: error: no matching member function for call to 'getValue'
+            return std::exp(operands[0].getValue());
+                            ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:26:41: error: no matching member function for call to 'getValue'
+            return std::pow(operands[0].getValue(), operands[1].getValue());
+                            ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:26:65: error: no matching member function for call to 'getValue'
+            return std::pow(operands[0].getValue(), operands[1].getValue());
+                                                    ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:47:41: error: no matching member function for call to 'getValue'
+            return operands[(1-op_idx)].getValue();
+                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:51:40: error: no matching member function for call to 'getValue'
+                return 1 / operands[1].getValue();
+                           ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:53:37: error: no matching member function for call to 'getValue'
+                return -operands[0].getValue() / std::pow(operands[1].getValue(), 2);
+                        ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:53:71: error: no matching member function for call to 'getValue'
+                return -operands[0].getValue() / std::pow(operands[1].getValue(), 2);
+                                                          ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:56:41: error: no matching member function for call to 'getValue'
+            return std::exp(operands[0].getValue());
+                            ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:60:45: error: no matching member function for call to 'getValue'
+                return std::pow(operands[0].getValue(), operands[1].getValue()-1) * 
+                                ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+src/expression.cpp:60:69: error: no matching member function for call to 'getValue'
+                return std::pow(operands[0].getValue(), operands[1].getValue()-1) * 
+                                                        ~~~~~~~~~~~~^~~~~~~~
+src/var.h:194:8: note: candidate template ignored: couldn't infer template argument 'T'
+T var::getValue() const { return *std::static_pointer_cast<T>(pimpl->val); }
+       ^
+fatal error: too many errors emitted, stopping now [-ferror-limit=]
+1 warning and 20 errors generated.
+make: *** [Makefile:17: expression.o] Error 1

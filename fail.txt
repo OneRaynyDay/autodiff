@@ -1,0 +1,65 @@
+test/var-test.cpp:30:17: error: no viable conversion from 'int' to 'et::var'
+        et::var y = 3;
+                ^   ~
+test/../src/var.h:97:5: note: candidate constructor not viable: no known conversion from 'int' to 'std::shared_ptr<impl>' for 1st argument
+    var(std::shared_ptr<impl>);
+    ^
+test/../src/var.h:101:5: note: candidate constructor not viable: no known conversion from 'int' to 'term_t' (aka 'variant<double, Matrix<double, Dynamic, 1>, Matrix<double, Dynamic, Dynamic> >') for 1st argument
+    var(term_t);
+    ^
+test/../src/var.h:107:5: note: candidate constructor not viable: no known conversion from 'int' to 'et::var &&' for 1st argument
+    var(var&&) noexcept;
+    ^
+test/../src/var.h:111:5: note: candidate constructor not viable: no known conversion from 'int' to 'const et::var &' for 1st argument
+    var(const var&);
+    ^
+test/var-test.cpp:31:34: error: expected '(' for function-style cast or type construction
+        REQUIRE(y.getValue<double>() == 3);
+                           ~~~~~~^
+test/catch.hpp:11511:91: note: expanded from macro 'REQUIRE'
+#define REQUIRE( expr ) INTERNAL_CATCH_TEST( "REQUIRE", Catch::ResultDisposition::Normal, expr  )
+                                                                                          ^~~~
+test/catch.hpp:2154:32: note: expanded from macro 'INTERNAL_CATCH_TEST'
+            ( __catchResult <= expr ).endExpression(); \
+                               ^~~~
+test/var-test.cpp:31:36: error: expected expression
+        REQUIRE(y.getValue<double>() == 3);
+                                   ^
+test/var-test.cpp:31:34: error: expected '(' for function-style cast or type construction
+        REQUIRE(y.getValue<double>() == 3);
+                           ~~~~~~^
+test/catch.hpp:11511:91: note: expanded from macro 'REQUIRE'
+#define REQUIRE( expr ) INTERNAL_CATCH_TEST( "REQUIRE", Catch::ResultDisposition::Normal, expr  )
+                                                                                          ^~~~
+test/catch.hpp:2161:60: note: expanded from macro 'INTERNAL_CATCH_TEST'
+    } while( Catch::isTrue( false && static_cast<bool>( !!(expr) ) ) ) // expr here is never evaluated at runtime but it forces the compiler to give it a look
+                                                           ^~~~
+test/var-test.cpp:31:36: error: expected expression
+        REQUIRE(y.getValue<double>() == 3);
+                                   ^
+test/var-test.cpp:56:23: error: invalid operands to binary expression ('et::var' and 'int')
+        et::var w = y + 5;
+                    ~ ^ ~
+test/../src/var.h:212:18: note: candidate function not viable: no known conversion from 'int' to 'et::var' for 2nd argument
+inline const var operator+(var lhs, var rhs){
+                 ^
+test/var-test.cpp:104:24: error: invalid operands to binary expression ('int' and 'et::var')
+        et::var z = 15 + x;
+                    ~~ ^ ~
+test/../src/var.h:212:18: note: candidate function not viable: no known conversion from 'int' to 'et::var' for 1st argument
+inline const var operator+(var lhs, var rhs){
+                 ^
+test/var-test.cpp:115:23: error: invalid operands to binary expression ('et::var' and 'int')
+        et::var z = y + 15;
+                    ~ ^ ~~
+test/../src/var.h:212:18: note: candidate function not viable: no known conversion from 'int' to 'et::var' for 2nd argument
+inline const var operator+(var lhs, var rhs){
+                 ^
+test/var-test.cpp:139:19: error: invalid operands to binary expression ('et::var' and 'int')
+    et::var x = y + 10;
+                ~ ^ ~~
+test/../src/var.h:212:18: note: candidate function not viable: no known conversion from 'int' to 'et::var' for 2nd argument
+inline const var operator+(var lhs, var rhs){
+                 ^
+9 errors generated.
+make: *** [Makefile:23: var-test] Error 1
