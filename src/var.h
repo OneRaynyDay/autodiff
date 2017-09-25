@@ -146,7 +146,6 @@ public:
     // the parents are held.
     std::vector<var> getParents() const;
 
-    term_type getTermType() const;
     long getUseCount() const;
 
     // Comparison for hash
@@ -183,9 +182,6 @@ public:
     // For example, `z = x + y` will have z contain
     // an op value of var::op::plus
     op_type op; 
-
-    // The value associated with this variable.
-    term_type term;
 
     // The children of the current variable, 
     // i.e. which variables make up this variable.

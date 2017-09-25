@@ -84,7 +84,7 @@ var::impl::impl(var::term_t _val):
     op(op_type::none){}
 
 var::impl::impl(op_type _op, const std::vector<var>& _children)
-: op(_op), term(term_type::none) {
+: op(_op){
     for(const var& v : _children){
         children.emplace_back(v.pimpl);
     }
