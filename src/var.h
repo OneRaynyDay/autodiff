@@ -30,18 +30,6 @@ enum class op_type {
     none // no operators. leaf.
 };
 
-// Current support for values:
-// scalar - double precision
-// vector - double precision
-// matrix - double precision
-// none - not yet evaluated
-enum class term_type {
-    scalar,
-    vector,
-    matrix,
-    none // no term_type has yet been declared yet.
-};
-
 int numOpArgs(op_type op);
 
 }
@@ -146,7 +134,6 @@ public:
     // the parents are held.
     std::vector<var> getParents() const;
 
-    term_type getTermType() const;
     long getUseCount() const;
 
     // Comparison for hash
@@ -172,20 +159,14 @@ public:
     impl(op_type, const std::vector<var>&);
 
     // The value that the variable currently holds.
-    // Currently implemented as an std::shared_ptr<void>.
-    // Before anyone screams injustice, this choice was
-    // taken under much discussion.
+    // Dynamic arrays are 24 bytes, and vectors are 16.
+    // Doubles are 8, so we're good on the memory bloat issue.
     term_t val;
-    
-
 
     // The operator associated with this variable.
     // For example, `z = x + y` will have z contain
     // an op value of var::op::plus
     op_type op; 
-
-    // The value associated with this variable.
-    term_type term;
 
     // The children of the current variable, 
     // i.e. which variables make up this variable.
