@@ -55,6 +55,18 @@ TEST_CASE( "et::expression can evaluate an expression *RECURSIVELY*.", "[et::exp
         et::expression exp(root);
         REQUIRE(boost::get<double>(exp.propagate()) == 32);
     }
+    SECTION( "et::expression evaluates a+b+c+2" ) {
+        et::var a(10), b(5), c(15);
+        et::var root = (a + b) + (c + 2);
+        et::expression exp(root);
+        REQUIRE(boost::get<double>(exp.propagate()) == 32);
+    }
+    SECTION( "et::expression evaluates a-b-c-2" ) {
+        et::var a(10), b(5), c(15);
+        et::var root = a - b - c - 2;
+        et::expression exp(root);
+        REQUIRE(boost::get<double>(exp.propagate()) == -22);
+    }
 }
     // SECTION( "et::expression evaluates poly(a,b)/c" ) {
         // et::var a(2), b(3), c(8);
