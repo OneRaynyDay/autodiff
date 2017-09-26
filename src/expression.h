@@ -38,12 +38,12 @@ public:
 
     // Recursively evaluates the tree.
     // This may have memory issues if the stack size is significant.
-    double propagate();
+    term_t propagate();
     
     // Uses the given leaves, possibly from findSource(),
     // and performs a bottom-up evaluation of the tree
     // from the leaves.
-    double propagate(const std::vector<var>& leaves);
+    term_t propagate(const std::vector<var>& leaves);
 
     // Finds all the nodes that are involved in the gradient flow of
     // the variables inside the std::vector.

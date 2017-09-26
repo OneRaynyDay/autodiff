@@ -1,20 +1,20 @@
-CC=clang++
+CC=g++
 FLAGS=-Wall -g -Wc++11-extensions -std=c++11
 
 # RUN
 build: expression.o main.o var.o
 	$(CC) $(FLAGS) -o build/main build/main.o build/var.o build/expression.o
 	build/main
-test: var-test # expression-test utils-test
+test: var-test expression-test # utils-test
 	build/var-test
-	# build/expression-test
+	build/expression-test
 	# build/utils-test
 
 # SRC BUILD
 var.o: src/var.cpp
 	$(CC) $(FLAGS) -c src/var.cpp -o build/var.o
-expression.o: src/expression.cpp
-	$(CC) $(FLAGS) -c src/expression.cpp -o build/expression.o
+expression.o: src/expression.cpp src/visitors.cpp
+	$(CC) $(FLAGS) -c src/expression.cpp src/visitors.cpp -o build/expression.o
 
 # TEST BUILD
 main-test.o: test/main-test.cpp

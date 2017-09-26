@@ -8,6 +8,7 @@
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
+typedef boost::variant<double, VectorXd, MatrixXd> term_t;
 
 namespace et{
 // forward declare class var
@@ -80,7 +81,6 @@ class var {
 struct impl;
 
 public:
-    typedef boost::variant<double, VectorXd, MatrixXd> term_t;
     // For initialization of new vars by ptr
     var(std::shared_ptr<impl>);
     
@@ -109,11 +109,11 @@ public:
     var& operator=(const var&);
 
     // deep copyable
-    var clone();
+    var clone() const;
     
     // Access/Modify the current node value
     term_t getValue() const;
-    template<typename T> 
+    template<typename T = term_t> 
     T getValue() const;
     
     void setValue(term_t);
@@ -123,6 +123,9 @@ public:
     
     // Access internals (no modify)
     
+    // returns the raw variant object.
+    const term_t& getTerm() const;
+
     // We return by reference because we do not
     // want to increase the shared_ptr count.
     // (Even though it's innocuous so far)
@@ -154,7 +157,7 @@ struct var::impl{
 public:
     // Either allow to enter a value(leaf)
     // Or allow to enter operation and children(parent)
-    impl(var::term_t);
+    impl(term_t);
 
     impl(op_type, const std::vector<var>&);
 

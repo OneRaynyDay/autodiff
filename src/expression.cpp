@@ -1,25 +1,27 @@
 #include "expression.h"
+#include "visitors.h"
 #include <cmath>
 #include <exception>
 
 namespace et{
 
 // Helper function for recursive propagation
-double _eval(op_type op, const std::vector<var>& operands){
+term_t _eval(op_type op, const std::vector<var>& operands){
     switch(op){
         case op_type::plus:
-
-        case op_type::minus:
-            return operands[0].getValue() - operands[1].getValue();
-        case op_type::multiply:
-            return operands[0].getValue() * operands[1].getValue();
-        case op_type::divide:
-            return operands[0].getValue() / operands[1].getValue();
-        case op_type::exponent:
-            return std::exp(operands[0].getValue());
-        case op_type::polynomial:
-            return std::pow(operands[0].getValue(), operands[1].getValue());
-        case op_type::none:
+            return boost::apply_visitor( plus_visitor(), operands[0].getTerm(), operands[1].getTerm() );
+        // case op_type::minus:
+            // return operands[0].getValue() - operands[1].getValue();
+        // case op_type::multiply:
+            // return operands[0].getValue() * operands[1].getValue();
+        // case op_type::divide:
+            // return operands[0].getValue() / operands[1].getValue();
+        // case op_type::exponent:
+            // return std::exp(operands[0].getValue());
+        // case op_type::polynomial:
+            // return std::pow(operands[0].getValue(), operands[1].getValue());
+        // case op_type::none:
+        default:
             throw std::invalid_argument("Cannot have a non-leaf contain none-op.");
     }; 
 }
@@ -28,39 +30,41 @@ double _eval(op_type op, const std::vector<var>& operands){
 double _back_single(op_type op, 
         const std::vector<var>& operands,
         int op_idx){
-    switch(op){
-        case op_type::plus: {
-            return 1;
-        }
-        case op_type::minus: {
-            if(op_idx == 0)
-                return 1;
-            else
-                return -1;
-        }
-        case op_type::multiply: {
-            return operands[(1-op_idx)].getValue();
-        }
-        case op_type::divide: {
-            if(op_idx == 0)
-                return 1 / operands[1].getValue();
-            else
-                return -operands[0].getValue() / std::pow(operands[1].getValue(), 2);
-        }
-        case op_type::exponent: {
-            return std::exp(operands[0].getValue());
-        }
-        case op_type::polynomial: {
-            if(op_idx == 0)
-                return std::pow(operands[0].getValue(), operands[1].getValue()-1) * 
-                    operands[1].getValue();
-            else
-                return 0; // we don't support exponents other than e.
-        }
-        case op_type::none: {
-            throw std::invalid_argument("Cannot have a non-leaf contain none-op.");
-        }
-    }; 
+    throw std::invalid_argument("Backpropagate not yet implemented");
+    return 0;
+    // switch(op){
+        // case op_type::plus: {
+            // return 1;
+        // }
+        // case op_type::minus: {
+            // if(op_idx == 0)
+                // return 1;
+            // else
+                // return -1;
+        // }
+        // case op_type::multiply: {
+            // return operands[(1-op_idx)].getValue();
+        // }
+        // case op_type::divide: {
+            // if(op_idx == 0)
+                // return 1 / operands[1].getValue();
+            // else
+                // return -operands[0].getValue() / std::pow(operands[1].getValue(), 2);
+        // }
+        // case op_type::exponent: {
+            // return std::exp(operands[0].getValue());
+        // }
+        // case op_type::polynomial: {
+            // if(op_idx == 0)
+                // return std::pow(operands[0].getValue(), operands[1].getValue()-1) *
+                    // operands[1].getValue();
+            // else
+                // return 0; // we don't support exponents other than e.
+        // }
+        // case op_type::none: {
+            // throw std::invalid_argument("Cannot have a non-leaf contain none-op.");
+        // }
+    // };
 }
 
 std::vector<double> _back(op_type op, const std::vector<var>& operands,
@@ -121,7 +125,7 @@ void _rpropagate(var& v){
     v.setValue(_eval(v.getOp(), v.getChildren()));
 }
 
-double expression::propagate(){
+term_t expression::propagate(){
     _rpropagate(root);
     return root.getValue();
 }
@@ -144,7 +148,7 @@ double expression::propagate(){
 //     
 // return root.val
 
-double expression::propagate(const std::vector<var>& leaves){
+term_t expression::propagate(const std::vector<var>& leaves){
     std::queue<var> q;
     std::unordered_map<var, int> explored; 
     for(const var& v : leaves)

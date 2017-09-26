@@ -27,7 +27,7 @@ var::~var() = default;
 var::var(const var&) = default;
 var& var::operator=(const var&) = default;
 // deep copyable
-var var::clone(){
+var var::clone() const{
     return var(std::make_shared<impl>(*pimpl)); 
 }
 
@@ -51,15 +51,17 @@ var::var(op_type _op, const std::vector<var>& _children)
 : pimpl(std::make_shared<impl>(_op, _children)){}
 
 /* getters and setters */
-var::term_t var::getValue() const { return pimpl->val; }
+term_t var::getValue() const { return pimpl->val; }
 
-void var::setValue(var::term_t _val) { 
+void var::setValue(term_t _val) { 
     pimpl->val = _val; 
 }
 
 op_type var::getOp() const{ return pimpl->op; }
 
 void var::setOp(op_type _op){ pimpl->op = _op; }
+
+const term_t& var::getTerm() const{ return pimpl->val; }
 
 std::vector<var>& var::getChildren() const{ return pimpl->children; }
 
@@ -79,7 +81,7 @@ long var::getUseCount() const{
 bool var::operator==(const var& rhs) const{ return pimpl.get() == rhs.pimpl.get(); }
 
 /* et::var::impl funcs: */
-var::impl::impl(var::term_t _val): 
+var::impl::impl(term_t _val): 
     val(_val),
     op(op_type::none){}
 
