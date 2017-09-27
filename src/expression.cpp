@@ -204,7 +204,7 @@ std::unordered_set<var> expression::findNonConsts(const std::vector<var>& leaves
 
 void expression::backpropagate(std::unordered_map<var, double>& leaves){
     std::queue<var> q;
-    std::unordered_map<var, double> derivatives;
+    std::unordered_map<var, term_t> derivatives;
     q.push(root);
     derivatives[root] = 1;
     
