@@ -9,9 +9,9 @@ namespace et{
 term_t _eval(op_type op, const std::vector<var>& operands){
     switch(op){
         case op_type::plus:
-            return boost::apply_visitor( plus_visitor(), operands[0].getTerm(), operands[1].getTerm() );
-        // case op_type::minus:
-            // return boost::apply_visitor( minus_visitor(), operands[0].getTerm(), operands[1].getTerm() );
+            return boost::apply_visitor( eval_plus_visitor(), operands[0].getTerm(), operands[1].getTerm() );
+        case op_type::minus:
+            return boost::apply_visitor( eval_minus_visitor(), operands[0].getTerm(), operands[1].getTerm() );
         // case op_type::multiply:
             // return operands[0].getValue() * operands[1].getValue();
         // case op_type::divide:
