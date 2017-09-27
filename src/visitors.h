@@ -4,6 +4,22 @@
 #include <boost/variant.hpp>
 
 namespace et{
+class var_visitor : public boost::static_visitor<term_type> {
+    term_type operator()(auto& t) {
+        using T = typename std::decay<decltype(t)>::type;
+        if constexpr(std::is_same<T,double>::value ) {
+            return term_type::double_t;
+        }
+        else if constexpr(std::is_same<T,VectorXd>::value ) {
+            return term_type::vector_t;
+        }
+        else if constexpr(std::is_same<T,MatrixXd>::value ) {
+            return term_type::matrix_t;
+        }
+        else return term_type::unknown_t;
+    } 
+};
+
 
 class plus_visitor : public boost::static_visitor<term_t> {
 public:
@@ -45,3 +61,6 @@ public:
 };
 
 }
+
+
+

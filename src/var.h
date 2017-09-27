@@ -14,6 +14,13 @@ namespace et{
 // forward declare class var
 class var;
 
+enum class term_type {
+    double_t,
+    vector_t,
+    matrix_t,
+    unknown_t
+};
+
 // Current support for operators:
 // operator+
 // operator-
