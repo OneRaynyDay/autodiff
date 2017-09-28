@@ -217,13 +217,6 @@ void expression::backpropagate(std::unordered_map<var, term_t>& leaves){
         std::cout << "Found a double." << std::endl;
         derivatives[root] = term_t(1);
     }
-    // else if(root.getTerm().type() == typeid(VectorXd)){
-        // std::cout << "Found a vector." << std::endl;
-        // auto _root = root.getValue<VectorXd>();
-        // // For some reason, VectorXd::Ones does not return a VectorXd.
-        // // That's why we explicitly cast here.
-        // derivatives[root] = term_t(VectorXd(VectorXd::Ones(_root.size())));
-    // }
     else if(root.getTerm().type() == typeid(MatrixXd)){
         std::cout << "Found a matrix." << std::endl;
         auto _root = root.getValue<MatrixXd>();
