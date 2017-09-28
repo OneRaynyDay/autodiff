@@ -67,26 +67,33 @@ double _back_single(op_type op,
     // };
 }
 
-std::vector<double> _back(op_type op, const std::vector<var>& operands,
-        const std::vector<bool>& nonconsts,
-        double dx){
-    std::vector<double> derivatives;
-    for(size_t i = 0; i < operands.size(); i++){
-        if(!nonconsts[i])
-            derivatives.push_back(0); // no gradient flow.
-        else
-            derivatives.push_back(dx * _back_single(op, operands, i));
-    }
-    return derivatives;
-}
+// std::vector<term_t> _back(op_type op, const std::vector<var>& operands,
+        // const std::vector<bool>& nonconsts,
+        // double dx){
+    // throw std::invalid_argument("Not yet implemented.");
+    // // std::vector<double> derivatives;
+    // // for(size_t i = 0; i < operands.size(); i++){
+        // // if(!nonconsts[i])
+            // // derivatives.push_back(0); // no gradient flow.
+        // // else
+            // // derivatives.push_back(dx * _back_single(op, operands, i));
+    // // }
+    // // return derivatives;
+// }
 
-std::vector<double> _back(op_type op, const std::vector<var>& operands,
-        double dx){
-    std::vector<double> derivatives;
-    for(size_t i = 0; i < operands.size(); i++){
-        derivatives.push_back(dx * _back_single(op, operands, i));
-    }
-    return derivatives;
+std::vector<term_t> _back(op_type op, const std::vector<var>& operands,
+        const var& root){
+    switch(op){
+        case op_type::plus: {
+            return boost::apply_visitor( back_plus_visitor(), root.getTerm(), operands[0].getTerm(), operands[1].getTerm() );
+        }
+        case op_type::none: {
+            throw std::invalid_argument("Cannot have a non-leaf contain none-op.");
+        }
+        default: {
+            throw std::logic_error("Current operator not supported.");
+        }
+    };
 }
 
 expression::expression(var _root) : root(_root){}
@@ -202,7 +209,7 @@ std::unordered_set<var> expression::findNonConsts(const std::vector<var>& leaves
 //     create an entire expression subtree for a value that is a constant.
 //     TODO: In the future, add a field in var that states whether it's a constant.
 
-void expression::backpropagate(std::unordered_map<var, double>& leaves){
+void expression::backpropagate(std::unordered_map<var, term_t>& leaves){
     std::queue<var> q;
     std::unordered_map<var, term_t> derivatives;
     q.push(root);
@@ -212,10 +219,12 @@ void expression::backpropagate(std::unordered_map<var, double>& leaves){
         var v = q.front();
         q.pop();
         std::vector<var>& children = v.getChildren();
-        std::vector<double> child_derivs = _back(v.getOp(), children, derivatives[v]);
+        std::vector<term_t> child_derivs = _back(v.getOp(), children, v);
         for(size_t i = 0; i < children.size(); i++){
-            // Be careful to not override the derivative value!
-            derivatives[children[i]] += child_derivs[i];
+            if(derivatives.find(children[i]) == derivatives.end()){
+                derivatives.emplace(children[i], 0);
+            }
+            boost::apply_visitor( eval_plus_visitor(), derivatives[children[i]], child_derivs[i] );
             if(children[i].getOp() != op_type::none)
                 q.push(children[i]); 
         }
@@ -230,33 +239,34 @@ void expression::backpropagate(std::unordered_map<var, double>& leaves){
 
 // Restricted BFS: same as previous, but we will have a set of nonconsts to tell us
 // where we can BFS to.
-void expression::backpropagate(std::unordered_map<var, double>& leaves, 
+void expression::backpropagate(std::unordered_map<var, term_t>& leaves, 
         const std::unordered_set<var>& nonconsts){
-    std::queue<var> q;
-    std::unordered_map<var, double> derivatives;
-    q.push(root);
-    derivatives[root] = 1;
-    
-    while(!q.empty()){
-        var v = q.front();
-        q.pop();
-        if(nonconsts.find(v) == nonconsts.end())
-            continue;
-        std::vector<var>& children = v.getChildren();
-        std::vector<double> child_derivs = _back(v.getOp(), children, derivatives[v]);
-        for(size_t i = 0; i < children.size(); i++){
-            // Be careful to not override the derivative value!
-            derivatives[children[i]] += child_derivs[i];
-            if(children[i].getOp() != op_type::none)
-                q.push(children[i]); 
-        }
-    }
-   
-    // After we have retrieved the derivatives,
-    // select the leaves and update in leaves.
-    for(auto& iter : leaves){
-        iter.second = derivatives[iter.first]; 
-    } 
+    throw std::invalid_argument("non-const optimization not yet implemented");
+    // std::queue<var> q;
+    // std::unordered_map<var, double> derivatives;
+    // q.push(root);
+    // derivatives[root] = 1;
+    //
+    // while(!q.empty()){
+        // var v = q.front();
+        // q.pop();
+        // if(nonconsts.find(v) == nonconsts.end())
+            // continue;
+        // std::vector<var>& children = v.getChildren();
+        // std::vector<term_t> child_derivs = _back(v.getOp(), children, derivatives[v]);
+        // for(size_t i = 0; i < children.size(); i++){
+            // // Be careful to not override the derivative value!
+            // derivatives[children[i]] += child_derivs[i];
+            // if(children[i].getOp() != op_type::none)
+                // q.push(children[i]);
+        // }
+    // }
+   //
+    // // After we have retrieved the derivatives,
+    // // select the leaves and update in leaves.
+    // for(auto& iter : leaves){
+        // iter.second = derivatives[iter.first];
+    // }
 }
 
 }

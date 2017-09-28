@@ -1,4 +1,4 @@
-CC=clang++
+CC=g++
 FLAGS=-Wall -g -Wc++11-extensions -std=c++11
 
 # RUN

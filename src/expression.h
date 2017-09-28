@@ -51,12 +51,12 @@ public:
 
     // Computes the derivative for the entire graph.
     // Performs a top-down evaluation of the tree.
-    void backpropagate(std::unordered_map<var, double>& leaves);
+    void backpropagate(std::unordered_map<var, term_t>& leaves);
 
     // We need the unordered_set for knowing nonconst values.
     // We compute one in the prev. def, and we can plug it into the new function so that
     // the nonconst computation isn't done again.
-    void backpropagate(std::unordered_map<var, double>& leaves, const std::unordered_set<var>& nonconsts);
+    void backpropagate(std::unordered_map<var, term_t>& leaves, const std::unordered_set<var>& nonconsts);
     
 private:
     var root;

@@ -2,6 +2,7 @@
 
 #include "var.h"
 #include <boost/variant.hpp>
+#include <boost/variant/multivisitors.hpp>
 
 namespace et{
 /*
@@ -78,9 +79,9 @@ public:
         // array([[ 2.,  2.,  2.,  2.,  2.],
         //        [ 2.,  2.,  2.,  2.,  2.],
         //        [ 2.,  2.,  2.,  2.,  2.]])
-        return {MatrixXd((-rhs.rowwise()) + lhs.tranpose())};
+        return {MatrixXd((-rhs).rowwise() + lhs.tranpose())};
     }
-    term_t operator()(const MatrixXd& lhs, double rhs) const{
+    term_t operator()(const MatrixXd& lhs, double rhs) const{jj
         return {MatrixXd(lhs.array() - rhs)}; 
     }
     term_t operator()(const MatrixXd& lhs, const VectorXd& rhs) const{
@@ -88,6 +89,40 @@ public:
     }
     term_t operator()(const MatrixXd& lhs, const MatrixXd& rhs) const{
         return {MatrixXd(lhs - rhs)};
+    }
+};
+
+class back_plus_visitor : public boost::static_visitor<term_t> {
+public:
+    template <typename A, typename B, typename C>
+    std::vector<term_t> operator()(const A&, const B&, const C&) const = delete;
+
+    std::vector<term_t> operator()(double root, double lhs, double rhs) const{
+        return {root, root};
+    }
+    std::vector<term_t> operator()(const VectorXd& root, double lhs, const VectorXd& rhs) const{
+        return {root.sum(), root};
+    }
+    std::vector<term_t> operator()(const MatrixXd& root, double lhs, const MatrixXd& rhs) const{
+        return {root.sum(), root};
+    }
+    std::vector<term_t> operator()(const VectorXd& root, const VectorXd& lhs, double rhs) const{
+        return operator()(root, rhs, lhs);
+    }
+    std::vector<term_t> operator()(const VectorXd& root, const VectorXd& lhs, const VectorXd& rhs) const{
+        return {root, root};
+    }
+    std::vector<term_t> operator()(const MatrixXd& root, const VectorXd& lhs, const MatrixXd& rhs) const{
+        return {root.rowwise().sum(), root};
+    }
+    std::vector<term_t> operator()(const MatrixXd& root, const MatrixXd& lhs, double rhs) const{
+        return operator()(root, rhs, lhs);
+    }
+    std::vector<term_t> operator()(const MatrixXd& root, const MatrixXd& lhs, const VectorXd& rhs) const{
+        return operator()(root, rhs, lhs);
+    }
+    std::vector<term_t> operator()(const MatrixXd& root, const MatrixXd& lhs, const MatrixXd& rhs) const{
+        return {root, root};
     }
 };
 
