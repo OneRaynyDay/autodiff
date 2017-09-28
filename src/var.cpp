@@ -38,14 +38,8 @@ var::var(std::shared_ptr<impl> _pimpl) : pimpl(_pimpl){};
 var::var(double _val)
 : pimpl(std::make_shared<impl>(_val)){}
 
-var::var(VectorXd  _val)
-: pimpl(std::make_shared<impl>(_val)){}
-
 var::var(MatrixXd _val)
 : pimpl(std::make_shared<impl>(_val)){}
-
-var::var(term_t _val)
-: pimpl(std::make_shared<impl> (_val)){}
 
 var::var(op_type _op, const std::vector<var>& _children)
 : pimpl(std::make_shared<impl>(_op, _children)){}

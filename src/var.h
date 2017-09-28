@@ -8,7 +8,7 @@
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
-typedef boost::variant<double, VectorXd, MatrixXd> term_t;
+typedef boost::variant<double, MatrixXd> term_t;
 
 namespace et{
 // forward declare class var
@@ -99,10 +99,7 @@ public:
     //in reality we will be casting these to term_t but compiler can't
     //directly
     var(double);
-    var(VectorXd);
     var(MatrixXd);
-    
-    var(term_t);
     
     var(op_type, const std::vector<var>&);
     ~var();
