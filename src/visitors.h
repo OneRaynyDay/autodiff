@@ -71,17 +71,9 @@ public:
         return {VectorXd(lhs - rhs)};
     }
     term_t operator()(const VectorXd& lhs, const MatrixXd& rhs) const{
-        // Vector + Matrix will always be rowwise additions.
-        // For example:
-        // >>> y = np.ones((5,))
-        // >>> x = np.ones((3,5))
-        // >>> x + y
-        // array([[ 2.,  2.,  2.,  2.,  2.],
-        //        [ 2.,  2.,  2.,  2.,  2.],
-        //        [ 2.,  2.,  2.,  2.,  2.]])
-        return {MatrixXd((-rhs).rowwise() + lhs.tranpose())};
+        return {(-rhs).rowwise() + lhs.tranpose()};
     }
-    term_t operator()(const MatrixXd& lhs, double rhs) const{jj
+    term_t operator()(const MatrixXd& lhs, double rhs) const{
         return {MatrixXd(lhs.array() - rhs)}; 
     }
     term_t operator()(const MatrixXd& lhs, const VectorXd& rhs) const{
@@ -92,7 +84,7 @@ public:
     }
 };
 
-class back_plus_visitor : public boost::static_visitor<term_t> {
+class back_plus_visitor : public boost::static_visitor<std::vector<term_t> > {
 public:
     template <typename A, typename B, typename C>
     std::vector<term_t> operator()(const A&, const B&, const C&) const = delete;
