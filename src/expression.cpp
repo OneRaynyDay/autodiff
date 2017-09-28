@@ -82,10 +82,10 @@ double _back_single(op_type op,
 // }
 
 std::vector<term_t> _back(op_type op, const std::vector<var>& operands,
-        const var& root){
+        const term_t& root){
     switch(op){
         case op_type::plus: {
-            return boost::apply_visitor( back_plus_visitor(), root.getTerm(), operands[0].getTerm(), operands[1].getTerm() );
+            return boost::apply_visitor( back_plus_visitor(), root, operands[0].getTerm(), operands[1].getTerm() );
         }
         case op_type::none: {
             throw std::invalid_argument("Cannot have a non-leaf contain none-op.");
@@ -217,13 +217,13 @@ void expression::backpropagate(std::unordered_map<var, term_t>& leaves){
         std::cout << "Found a double." << std::endl;
         derivatives[root] = term_t(1);
     }
-    else if(root.getTerm().type() == typeid(VectorXd)){
-        std::cout << "Found a vector." << std::endl;
-        auto _root = root.getValue<VectorXd>();
-        // For some reason, VectorXd::Ones does not return a VectorXd.
-        // That's why we explicitly cast here.
-        derivatives[root] = term_t(VectorXd(VectorXd::Ones(_root.size())));
-    }
+    // else if(root.getTerm().type() == typeid(VectorXd)){
+        // std::cout << "Found a vector." << std::endl;
+        // auto _root = root.getValue<VectorXd>();
+        // // For some reason, VectorXd::Ones does not return a VectorXd.
+        // // That's why we explicitly cast here.
+        // derivatives[root] = term_t(VectorXd(VectorXd::Ones(_root.size())));
+    // }
     else if(root.getTerm().type() == typeid(MatrixXd)){
         std::cout << "Found a matrix." << std::endl;
         auto _root = root.getValue<MatrixXd>();
