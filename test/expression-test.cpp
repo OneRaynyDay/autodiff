@@ -62,6 +62,7 @@ TEST_CASE( "et::expression can evaluate an expression *RECURSIVELY*.", "[et::exp
         et::expression exp(root);
         REQUIRE(boost::get<double>(exp.propagate()) == 32);
     }
+    /*
     SECTION( "et::expression evaluates vector + 2" ) {
         VectorXd v = VectorXd(2);
         v << 1, 2;
@@ -71,6 +72,7 @@ TEST_CASE( "et::expression can evaluate an expression *RECURSIVELY*.", "[et::exp
         // REQUIRE(boost::get<VectorXd>(exp.propagate()) == VectorXd::Ones(3)*3);
         std::cout << boost::get<VectorXd>(exp.propagate()) << std::endl;
     }
+    */
 }
     // SECTION( "et::expression evaluates poly(a,b)/c" ) {
         // et::var a(2), b(3), c(8);
