@@ -79,7 +79,7 @@ public:
         // array([[ 2.,  2.,  2.,  2.,  2.],
         //        [ 2.,  2.,  2.,  2.,  2.],
         //        [ 2.,  2.,  2.,  2.,  2.]])
-        return {MatrixXd(((-rhs).rowwise()) + lhs.transpose())};
+        return {MatrixXd((-rhs).rowwise() + lhs.transpose())};
     }
     term_t operator()(const MatrixXd& lhs, double rhs) const{
         return {MatrixXd(lhs.array() - rhs)}; 
@@ -95,7 +95,10 @@ public:
 class back_plus_visitor : public boost::static_visitor<std::vector<term_t> > {
 public:
     template <typename A, typename B, typename C>
-    std::vector<term_t> operator()(const A&, const B&, const C&) const { return {}; }
+    std::vector<term_t> operator()(const A& root, const B& rhs, const C& lhs) const { 
+        std::cout << __PRETTY_FUNCTION__ << root << rhs << lhs << std::endl;
+        throw "This derivative cannot be computed."; 
+    }
 
     std::vector<term_t> operator()(double root, double lhs, double rhs) const{
         return {root, root};
@@ -107,7 +110,7 @@ public:
         return {root.sum(), root};
     }
     std::vector<term_t> operator()(const VectorXd& root, const VectorXd& lhs, double rhs) const{
-        return operator()(root, rhs, lhs);
+        return {root, root.sum()};
     }
     std::vector<term_t> operator()(const VectorXd& root, const VectorXd& lhs, const VectorXd& rhs) const{
         return {root, root};
@@ -116,10 +119,10 @@ public:
         return {VectorXd(root.rowwise().sum()), root};
     }
     std::vector<term_t> operator()(const MatrixXd& root, const MatrixXd& lhs, double rhs) const{
-        return operator()(root, rhs, lhs);
+        return {root, root.sum()};
     }
     std::vector<term_t> operator()(const MatrixXd& root, const MatrixXd& lhs, const VectorXd& rhs) const{
-        return operator()(root, rhs, lhs);
+        return {root, VectorXd(root.rowwise().sum())};
     }
     std::vector<term_t> operator()(const MatrixXd& root, const MatrixXd& lhs, const MatrixXd& rhs) const{
         return {root, root};

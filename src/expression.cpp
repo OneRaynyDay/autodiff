@@ -213,18 +213,33 @@ void expression::backpropagate(std::unordered_map<var, term_t>& leaves){
     std::queue<var> q;
     std::unordered_map<var, term_t> derivatives;
     q.push(root);
-    derivatives[root] = 1;
+    if(root.getTerm().type() == typeid(double)){
+        std::cout << "Found a double." << std::endl;
+        derivatives[root] = term_t(1);
+    }
+    else if(root.getTerm().type() == typeid(VectorXd)){
+        std::cout << "Found a vector." << std::endl;
+        auto _root = root.getValue<VectorXd>();
+        // For some reason, VectorXd::Ones does not return a VectorXd.
+        // That's why we explicitly cast here.
+        derivatives[root] = term_t(VectorXd(VectorXd::Ones(_root.size())));
+    }
+    else if(root.getTerm().type() == typeid(MatrixXd)){
+        std::cout << "Found a matrix." << std::endl;
+        auto _root = root.getValue<MatrixXd>();
+        derivatives[root] = term_t(MatrixXd(MatrixXd::Ones(_root.rows(), _root.cols())));
+    }
     
     while(!q.empty()){
         var v = q.front();
         q.pop();
         std::vector<var>& children = v.getChildren();
-        std::vector<term_t> child_derivs = _back(v.getOp(), children, v);
+        std::vector<term_t> child_derivs = _back(v.getOp(), children, derivatives[v]);
         for(size_t i = 0; i < children.size(); i++){
             if(derivatives.find(children[i]) == derivatives.end()){
                 derivatives.emplace(children[i], 0);
             }
-            boost::apply_visitor( eval_plus_visitor(), derivatives[children[i]], child_derivs[i] );
+            derivatives[children[i]] = boost::apply_visitor( eval_plus_visitor(), derivatives[children[i]], child_derivs[i] );
             if(children[i].getOp() != op_type::none)
                 q.push(children[i]); 
         }
