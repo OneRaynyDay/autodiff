@@ -165,6 +165,5 @@ TEST_CASE( "et::var can be exponentiated.", "[et::var::exp]" ) {
         et::var a = et::var(MatrixXd(1,2));
         et::var b = et::var(VectorXd(2));
         REQUIRE(a.getValue<MatrixXd>() == MatrixXd(1,2));
-        REQUIRE(b.getValue<VectorXd>() == VectorXd(2));
     }
 }

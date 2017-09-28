@@ -138,7 +138,7 @@ TEST_CASE( "et::expression can find the derivatives.", "[et::expression::propaga
         REQUIRE(boost::get<double>(m[c]) == 1);
         REQUIRE(boost::get<double>(m[d]) == 1);
     }
-
+    /*
     SECTION( "et::expression evaluates v+w+3" ) {
         VectorXd _v(3), _w(3);
         _v << 1,2,3;
@@ -158,6 +158,7 @@ TEST_CASE( "et::expression can find the derivatives.", "[et::expression::propaga
         REQUIRE(boost::get<VectorXd>(m[w]) == VectorXd::Ones(3));
         REQUIRE(boost::get<double>(m[s]) == 3);
     }
+    */
 }
 //
     // SECTION( "et::expression evaluates poly(a,b)/c" ) {
