@@ -67,9 +67,10 @@ TEST_CASE( "et::expression can evaluate an expression *RECURSIVELY*.", "[et::exp
         v << 1, 2;
         et::var a(v);
         et::var root = a + 2;
+        VectorXd ans = VectorXd(2);
+        ans << 3, 4;
         et::expression exp(root);
-        // REQUIRE(boost::get<VectorXd>(exp.propagate()) == VectorXd::Ones(3)*3);
-        std::cout << boost::get<VectorXd>(exp.propagate()) << std::endl;
+        REQUIRE(boost::get<VectorXd>(exp.propagate()) == ans);
     }
 }
     // SECTION( "et::expression evaluates poly(a,b)/c" ) {
@@ -116,25 +117,46 @@ TEST_CASE( "et::expression can evaluate an expression *RECURSIVELY*.", "[et::exp
 // }
 //
 //
-// TEST_CASE( "et::expression can find the derivatives.", "[et::expression::propagate]") {
-    // SECTION( "et::expression evaluates a+b+c+d" ) {
-        // et::var a(10), b(5), c(15), d(2);
-        // et::var root = (a + b) + (c + d);
-        // et::expression exp(root);
-        // std::unordered_map<et::var, double> m = {
-            // { a, 0 },
-            // { b, 0 },
-            // { c, 0 },
-            // { d, 0 }
-        // };
-        // exp.propagate();
-        // exp.backpropagate(m);
-//
-        // REQUIRE(m[a] == 1);
-        // REQUIRE(m[b] == 1);
-        // REQUIRE(m[c] == 1);
-        // REQUIRE(m[d] == 1);
-    // }
+TEST_CASE( "et::expression can find the derivatives.", "[et::expression::propagate]") {
+    SECTION( "et::expression evaluates a+b+c+d" ) {
+        et::var a(10), b(5), c(15), d(2);
+        et::var root = (a + b) + (c + d);
+        et::expression exp(root);
+        std::unordered_map<et::var, term_t> m = {
+            { a, {0} },
+            { b, {0} },
+            { c, {0} },
+            { d, {0} }
+        };
+        exp.propagate();
+        exp.backpropagate(m);
+
+        REQUIRE(boost::get<double>(m[a]) == 1);
+        REQUIRE(boost::get<double>(m[b]) == 1);
+        REQUIRE(boost::get<double>(m[c]) == 1);
+        REQUIRE(boost::get<double>(m[d]) == 1);
+    }
+
+    SECTION( "et::expression evaluates v+w+3" ) {
+        VectorXd _v(3), _w(3);
+        _v << 1,2,3;
+        _w << 0,5,10;
+        et::var v(_v), w(_w), s(3);
+        et::var root = v + w + s;
+        et::expression exp(root);
+        std::unordered_map<et::var, term_t> m = {
+            { v, VectorXd(VectorXd::Zero(3)) },
+            { w, VectorXd(VectorXd::Zero(3)) },
+            { s, {0} }
+        };
+        
+        std::cout << "propagate : " << exp.propagate() << std::endl;
+        exp.backpropagate(m);
+        REQUIRE(boost::get<VectorXd>(m[v]) == VectorXd::Ones(3));
+        REQUIRE(boost::get<VectorXd>(m[w]) == VectorXd::Ones(3));
+        REQUIRE(boost::get<double>(m[s]) == 3);
+    }
+}
 //
     // SECTION( "et::expression evaluates poly(a,b)/c" ) {
         // et::var a(2), b(3), c(8);
