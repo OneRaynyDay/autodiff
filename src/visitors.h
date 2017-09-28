@@ -87,7 +87,7 @@ public:
 class back_plus_visitor : public boost::static_visitor<std::vector<term_t> > {
 public:
     template <typename A, typename B, typename C>
-    std::vector<term_t> operator()(const A&, const B&, const C&) const = delete;
+    std::vector<term_t> operator()(const A&, const B&, const C&) const { return {}; }
 
     std::vector<term_t> operator()(double root, double lhs, double rhs) const{
         return {root, root};
@@ -105,7 +105,7 @@ public:
         return {root, root};
     }
     std::vector<term_t> operator()(const MatrixXd& root, const VectorXd& lhs, const MatrixXd& rhs) const{
-        return {root.rowwise().sum(), root};
+        return {VectorXd(root.rowwise().sum()), root};
     }
     std::vector<term_t> operator()(const MatrixXd& root, const MatrixXd& lhs, double rhs) const{
         return operator()(root, rhs, lhs);
