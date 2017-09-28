@@ -71,7 +71,15 @@ public:
         return {VectorXd(lhs - rhs)};
     }
     term_t operator()(const VectorXd& lhs, const MatrixXd& rhs) const{
-        return {(-rhs).rowwise() + lhs.tranpose()};
+        // Vector + Matrix will always be rowwise additions.
+        // For example:
+        // >>> y = np.ones((5,))
+        // >>> x = np.ones((3,5))
+        // >>> x + y
+        // array([[ 2.,  2.,  2.,  2.,  2.],
+        //        [ 2.,  2.,  2.,  2.,  2.],
+        //        [ 2.,  2.,  2.,  2.,  2.]])
+        return {MatrixXd(((-rhs).rowwise()) + lhs.transpose())};
     }
     term_t operator()(const MatrixXd& lhs, double rhs) const{
         return {MatrixXd(lhs.array() - rhs)}; 
