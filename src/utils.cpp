@@ -2,7 +2,7 @@
 
 namespace et{
 
-double eval(var& root, bool iter){
+MatrixXd eval(var& root, bool iter){
     expression exp(root);
     if(iter)
         return exp.propagate(exp.findLeaves());
@@ -11,7 +11,7 @@ double eval(var& root, bool iter){
 }
 
 void back(const var& root, 
-        std::unordered_map<var, double>& derivative,
+        std::unordered_map<var, MatrixXd>& derivative,
         std::set<back_flags> flags){
     expression exp(root);
     if(flags.find(back_flags::const_qualify) != flags.end()){

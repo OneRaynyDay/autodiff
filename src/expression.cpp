@@ -5,57 +5,108 @@
 namespace et{
 
 // Helper function for recursive propagation
-double _eval(op_type op, const std::vector<var>& operands){
+MatrixXd _eval(op_type op, const std::vector<var>& operands){
     switch(op){
         case op_type::plus:
-            return operands[0].getValue() + operands[1].getValue();
+            return operands[0].getValue().array() + operands[1].getValue().array();
         case op_type::minus:
-            return operands[0].getValue() - operands[1].getValue();
+            return operands[0].getValue().array() - operands[1].getValue().array();
         case op_type::multiply:
-            return operands[0].getValue() * operands[1].getValue();
+            return operands[0].getValue().array() * operands[1].getValue().array();
         case op_type::divide:
-            return operands[0].getValue() / operands[1].getValue();
+            return operands[0].getValue().array() / operands[1].getValue().array();
         case op_type::exponent:
-            return std::exp(operands[0].getValue());
+            return operands[0].getValue().array().exp();
         case op_type::polynomial:
-            return std::pow(operands[0].getValue(), operands[1].getValue());
+            return operands[0].getValue().array().pow(operands[1].getValue()(0,0));
+        case op_type::dot:{
+            std::cout << "(" << operands[0].getValue().rows() << ", " << operands[0].getValue().cols() << ") " << operands[0].getValue() << std::endl;
+            std::cout << "(" << operands[1].getValue().rows() << ", " << operands[1].getValue().cols() << ") " << operands[1].getValue() << std::endl;
+            MatrixXd res = operands[0].getValue() * operands[1].getValue();
+            std::cout << res << std::endl;
+            return res;
+        }
+        case op_type::inverse:
+            return operands[0].getValue().inverse();
+        case op_type::transpose:
+            return operands[0].getValue().transpose();
+        case op_type::scalar_multiply:
+            return operands[0].getValue().array() * operands[1].getValue()(0,0);
+        case op_type::scalar_divide:
+            return operands[0].getValue().array() / operands[1].getValue()(0,0);
         case op_type::none:
             throw std::invalid_argument("Cannot have a non-leaf contain none-op.");
     }; 
 }
 
 // Helper function for recursive backpropagation
-double _back_single(op_type op, 
+MatrixXd _back_single(op_type op, 
+        const MatrixXd& dx,
         const std::vector<var>& operands,
         int op_idx){
     switch(op){
         case op_type::plus: {
-            return 1;
+            if(op_idx == 0)
+                return dx.array() * ones_like(operands[0]).array();
+            else
+                return dx.array() * ones_like(operands[1]).array();
         }
         case op_type::minus: {
             if(op_idx == 0)
-                return 1;
+                return dx.array() * ones_like(operands[0]).array();
             else
-                return -1;
+                return dx.array() * -ones_like(operands[1]).array();
         }
         case op_type::multiply: {
-            return operands[(1-op_idx)].getValue();
+            return dx.array() * operands[(1-op_idx)].getValue().array();
         }
         case op_type::divide: {
             if(op_idx == 0)
-                return 1 / operands[1].getValue();
+                return dx.array() * (1 / operands[1].getValue().array());
             else
-                return -operands[0].getValue() / std::pow(operands[1].getValue(), 2);
+                return dx.array() * (-operands[0].getValue().array() / operands[1].getValue().array().pow(2));
         }
         case op_type::exponent: {
-            return std::exp(operands[0].getValue());
+            return dx.array() * operands[0].getValue().array().exp();
         }
         case op_type::polynomial: {
             if(op_idx == 0)
-                return std::pow(operands[0].getValue(), operands[1].getValue()-1) * 
-                    operands[1].getValue();
+                return dx.array() * operands[0].getValue().array().pow(operands[1].getValue()(0,0)-1) * 
+                    operands[1].getValue()(0,0);
             else
-                return 0; // we don't support exponents other than e.
+                return scalar(0); // we don't support exponents other than e.
+        }
+        case op_type::dot: {
+            if(op_idx == 0)
+                return dx * operands[1].getValue().transpose();
+            else
+                return operands[0].getValue().transpose() * dx;
+        }
+        case op_type::inverse: {
+            // (I)' = (AA^{-1})' = A(A^{-1}') + A'(A^{-1})
+            // AA^{-1}' = -A'A^{-1}
+            // A^{-1}AA^{-1}' = -A^{-1}A'A^{-1}
+            // A^{-1}' = -A^{-1}A'A^{-1}
+            // This means all of the next few chain rules are _nested_.
+            // That makes this gradient way too hard. It doesn't work with our current
+            // framework.
+            throw std::invalid_argument("The derivative of an inverse is too hard.");
+        }
+        case op_type::transpose: {
+            return dx.transpose();
+        }
+        case op_type::scalar_multiply: {
+            if(op_idx == 0) // the matrix
+                return dx.array() * operands[1].getValue()(0,0);
+            else // the scalar
+                return scalar((dx.array() * operands[0].getValue().array()).sum());
+        }
+        case op_type::scalar_divide: {
+            if(op_idx == 0) // the matrix
+                return dx.array() * (1 / operands[1].getValue()(0,0));
+            else // the scalar
+                return scalar((dx.array() * (-operands[0].getValue().array() / 
+                        operands[1].getValue().array().pow(2)(0,0))).sum());
         }
         case op_type::none: {
             throw std::invalid_argument("Cannot have a non-leaf contain none-op.");
@@ -63,25 +114,27 @@ double _back_single(op_type op,
     }; 
 }
 
-std::vector<double> _back(op_type op, const std::vector<var>& operands,
+std::vector<MatrixXd> _back(op_type op, const std::vector<var>& operands,
         const std::vector<bool>& nonconsts,
-        double dx){
-    std::vector<double> derivatives;
+        const MatrixXd& dx){
+    std::vector<MatrixXd> derivatives;
     for(size_t i = 0; i < operands.size(); i++){
         if(!nonconsts[i])
-            derivatives.push_back(0); // no gradient flow.
+            derivatives.push_back(zeros_like(operands[i])); // no gradient flow.
         else
-            derivatives.push_back(dx * _back_single(op, operands, i));
+            derivatives.push_back(_back_single(op, dx, operands, i));
     }
     return derivatives;
 }
 
-std::vector<double> _back(op_type op, const std::vector<var>& operands,
-        double dx){
-    std::vector<double> derivatives;
+std::vector<MatrixXd> _back(op_type op, const std::vector<var>& operands,
+        const MatrixXd& dx){
+    std::vector<MatrixXd> derivatives;
     for(size_t i = 0; i < operands.size(); i++){
-        derivatives.push_back(dx * _back_single(op, operands, i));
+        derivatives.push_back(_back_single(op, dx, operands, i));
+        std::cout << "derivative : " << derivatives[i] << std::endl;
     }
+    std::cout << std::endl;
     return derivatives;
 }
 
@@ -92,23 +145,25 @@ var expression::getRoot() const{
 }
 
 std::vector<var> expression::findLeaves(){
-    std::vector<var> leaves;
+    std::unordered_set<var> leaves;
     std::queue<var> q;
     q.push(root);
 
     while(!q.empty()){
         var v = q.front();
-        if(v.getChildren().empty())
-            leaves.push_back(v);
+        if(v.getChildren().empty()){
+            leaves.insert(v);
+        }
         else{
             std::vector<var> children = v.getChildren();
-            for(const var& v : children){
+            for(const var& v : children)
                 q.push(v);
-            }
         }
         q.pop();
     }
-    return leaves;
+    std::vector<var> ans;
+    std::copy(leaves.begin(), leaves.end(), std::back_inserter(ans));
+    return ans;
 }
 
 void _rpropagate(var& v){
@@ -121,7 +176,7 @@ void _rpropagate(var& v){
     v.setValue(_eval(v.getOp(), v.getChildren()));
 }
 
-double expression::propagate(){
+MatrixXd expression::propagate(){
     _rpropagate(root);
     return root.getValue();
 }
@@ -144,12 +199,13 @@ double expression::propagate(){
 //     
 // return root.val
 
-double expression::propagate(const std::vector<var>& leaves){
+MatrixXd expression::propagate(const std::vector<var>& leaves){
     std::queue<var> q;
     std::unordered_map<var, int> explored; 
-    for(const var& v : leaves)
+    for(const var& v : leaves){
         q.push(v);
-
+        std::cout << "Found leaf : " << v.getValue() << std::endl;
+    }
     while(!q.empty()){
         var v = q.front();
         q.pop();
@@ -198,22 +254,29 @@ std::unordered_set<var> expression::findNonConsts(const std::vector<var>& leaves
 //     create an entire expression subtree for a value that is a constant.
 //     TODO: In the future, add a field in var that states whether it's a constant.
 
-void expression::backpropagate(std::unordered_map<var, double>& leaves){
+void expression::backpropagate(std::unordered_map<var, MatrixXd>& leaves){
     std::queue<var> q;
-    std::unordered_map<var, double> derivatives;
+    std::unordered_map<var, MatrixXd> derivatives;
+    std::unordered_map<var, int> explored;
     q.push(root);
-    derivatives[root] = 1;
+    derivatives[root] = ones_like(root);
     
     while(!q.empty()){
         var v = q.front();
         q.pop();
         std::vector<var>& children = v.getChildren();
-        std::vector<double> child_derivs = _back(v.getOp(), children, derivatives[v]);
+        std::vector<MatrixXd> child_derivs = _back(v.getOp(), children, derivatives[v]);
         for(size_t i = 0; i < children.size(); i++){
+            auto child = children[i];
+            if(explored.find(child) == explored.end())
+                explored[child] = child.getParents().size();
+            explored[child]--;
             // Be careful to not override the derivative value!
-            derivatives[children[i]] += child_derivs[i];
-            if(children[i].getOp() != op_type::none)
-                q.push(children[i]); 
+            if(derivatives.find(child) == derivatives.end())
+                derivatives.emplace(child, zeros_like(child));
+            derivatives[child] = derivatives[child].array() + child_derivs[i].array();
+            if(children[i].getOp() != op_type::none && explored[child] == 0)
+                q.push(child); 
         }
     }
    
@@ -226,12 +289,13 @@ void expression::backpropagate(std::unordered_map<var, double>& leaves){
 
 // Restricted BFS: same as previous, but we will have a set of nonconsts to tell us
 // where we can BFS to.
-void expression::backpropagate(std::unordered_map<var, double>& leaves, 
+void expression::backpropagate(std::unordered_map<var, MatrixXd>& leaves, 
         const std::unordered_set<var>& nonconsts){
     std::queue<var> q;
-    std::unordered_map<var, double> derivatives;
+    std::unordered_map<var, MatrixXd> derivatives;
+    std::unordered_map<var, int> explored;
     q.push(root);
-    derivatives[root] = 1;
+    derivatives[root] = ones_like(root);
     
     while(!q.empty()){
         var v = q.front();
@@ -239,12 +303,18 @@ void expression::backpropagate(std::unordered_map<var, double>& leaves,
         if(nonconsts.find(v) == nonconsts.end())
             continue;
         std::vector<var>& children = v.getChildren();
-        std::vector<double> child_derivs = _back(v.getOp(), children, derivatives[v]);
+        std::vector<MatrixXd> child_derivs = _back(v.getOp(), children, derivatives[v]);
         for(size_t i = 0; i < children.size(); i++){
+            auto child = children[i];
+            if(explored.find(child) == explored.end())
+                explored[child] = child.getParents().size();
+            explored[child]--;
             // Be careful to not override the derivative value!
-            derivatives[children[i]] += child_derivs[i];
-            if(children[i].getOp() != op_type::none)
-                q.push(children[i]); 
+            if(derivatives.find(child) == derivatives.end())
+                derivatives.emplace(child, zeros_like(child));
+            derivatives[child] = derivatives[child].array() + child_derivs[i].array();
+            if(children[i].getOp() != op_type::none && explored[child] == 0)
+                q.push(child); 
         }
     }
    

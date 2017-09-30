@@ -1,18 +1,13 @@
 #pragma once
 
-// Macros for debugging
-#define DEBUG
-
-#ifdef DEBUG
- #define D if(1) 
-#else
- #define D if(0) 
-#endif
-// enddebug
 #include <iostream>
 #include <vector>
 #include <memory>
 #include <utility>
+#include <eigen3/Eigen/Dense>
+
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
 
 namespace et{
 // forward declare class var
@@ -32,10 +27,22 @@ enum class op_type {
     divide,
     exponent,
     polynomial,
+    dot,
+    inverse,
+    transpose,
+    scalar_multiply,
+    scalar_divide,
     none // no operators. leaf.
 };
 
 int numOpArgs(op_type op);
+
+// Convenience functions for initializing MatrixXd's.
+MatrixXd scalar(double);
+MatrixXd zeros_like(const MatrixXd&);
+MatrixXd zeros_like(const var&);
+MatrixXd ones_like(const MatrixXd&);
+MatrixXd ones_like(const var&);
 
 }
 
@@ -88,6 +95,7 @@ public:
     var(std::shared_ptr<impl>);
 
     var(double);
+    var(const MatrixXd&);
     var(op_type, const std::vector<var>&);
     ~var();
 
@@ -103,8 +111,8 @@ public:
     var clone();
     
     // Access/Modify the current node value
-    double getValue() const;
-    void setValue(double);
+    MatrixXd getValue() const;
+    void setValue(const MatrixXd&);
     op_type getOp() const;
     void setOp(op_type);
     
@@ -140,14 +148,14 @@ struct var::impl{
 public:
     // Either allow to enter a value(leaf)
     // Or allow to enter operation and children(parent)
-    impl(double);
+    impl(const MatrixXd&);
     impl(op_type, const std::vector<var>&);
 
     // The value that the variable currently holds.
-    // Currently only supports double.
+    // Currently only supports MatrixXd.
     // In the future template and type promotion should be
     // taken into consideration.
-    double val;
+    MatrixXd val;
 
     // The operator associated with this variable.
     // For example, `z = x + y` will have z contain
@@ -203,9 +211,27 @@ inline const var exp(var v){
 }
 
 inline const var poly(var v, var power){
-    var p(power);
-    return pack_expression(op_type::polynomial, v, p);
+    return pack_expression(op_type::polynomial, v, power);
 }
 
+inline const var dot(var lhs, var rhs){
+    return pack_expression(op_type::dot, lhs, rhs);
+}
+
+inline const var inverse(var v){
+    return pack_expression(op_type::inverse, v);
+}
+
+inline const var transpose(var v){
+    return pack_expression(op_type::transpose, v);
+}
+
+inline const var multiply(var lhs, var rhs){
+    return pack_expression(op_type::scalar_multiply, lhs, rhs);
+}
+
+inline const var divide(var lhs, var rhs){
+    return pack_expression(op_type::scalar_divide, lhs, rhs);
+}
 }
 

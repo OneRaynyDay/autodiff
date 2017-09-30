@@ -2,6 +2,29 @@
 #include <map>
 
 namespace et{
+
+MatrixXd scalar(double num){
+    MatrixXd m(1,1);
+    m(0,0) = num;
+    return m;
+}
+
+MatrixXd zeros_like(const MatrixXd& like){
+    return MatrixXd::Zero(like.rows(), like.cols());
+}
+
+MatrixXd zeros_like(const var& like){
+    return MatrixXd::Zero(like.getValue().rows(), like.getValue().cols());
+}
+
+MatrixXd ones_like(const MatrixXd& like){
+    return MatrixXd::Ones(like.rows(), like.cols());
+}
+
+MatrixXd ones_like(const var& like){
+    return MatrixXd::Ones(like.getValue().rows(), like.getValue().cols());
+}
+
 /* enum find */
 
 int numOpArgs(op_type op){
@@ -11,7 +34,12 @@ int numOpArgs(op_type op){
         { op_type::multiply, 2 },
         { op_type::divide, 2 },
         { op_type::exponent, 1 },
-        { op_type::polynomial, 1 },
+        { op_type::polynomial, 2 },
+        { op_type::dot, 2 },
+        { op_type::inverse, 1 },
+        { op_type::transpose, 1 },
+        { op_type::scalar_multiply, 2 },
+        { op_type::scalar_divide, 2 },
         { op_type::none, 0 },
     };
     return op_args.find(op)->second;
@@ -34,16 +62,19 @@ var var::clone(){
 /* et::var funcs: */
 var::var(std::shared_ptr<impl> _pimpl) : pimpl(_pimpl){};
 
-var::var(double _val) 
+var::var(const MatrixXd& _val) 
 : pimpl(new impl(_val)){}
+
+var::var(double _val) 
+: pimpl(new impl(scalar(_val))){}
 
 var::var(op_type _op, const std::vector<var>& _children)
 : pimpl(new impl(_op, _children)){}
 
 /* getters and setters */
-double var::getValue() const{ return pimpl->val; }
+MatrixXd var::getValue() const{ return pimpl->val; }
 
-void var::setValue(double _val){ pimpl->val = _val; }
+void var::setValue(const MatrixXd& _val){ pimpl->val = _val; }
 
 op_type var::getOp() const{ return pimpl->op; }
 
@@ -67,7 +98,7 @@ long var::getUseCount() const{
 bool var::operator==(const var& rhs) const{ return pimpl.get() == rhs.pimpl.get(); }
 
 /* et::var::impl funcs: */
-var::impl::impl(double _val) : 
+var::impl::impl(const MatrixXd& _val) : 
     val(_val), 
     op(op_type::none){}
 

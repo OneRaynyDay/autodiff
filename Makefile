@@ -4,7 +4,7 @@ FLAGS=-Wall -g -Wc++11-extensions -std=c++11
 build: expression.o main.o var.o
 	g++ $(FLAGS) -o build/main build/main.o build/var.o build/expression.o
 	build/main
-test: var-test expression-test utils-test
+test: utils-test var-test expression-test utils-test
 	build/var-test
 	build/expression-test
 	build/utils-test
