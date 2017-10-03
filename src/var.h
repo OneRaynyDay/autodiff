@@ -26,10 +26,13 @@ enum class op_type {
     multiply,
     divide,
     exponent,
+    log,
     polynomial,
     dot,
     inverse,
     transpose,
+    scalar_add,
+    scalar_subtract,
     scalar_multiply,
     scalar_divide,
     none // no operators. leaf.
@@ -210,6 +213,10 @@ inline const var exp(var v){
     return pack_expression(op_type::exponent, v);
 }
 
+inline const var log(var v){
+    return pack_expression(op_type::log, v);
+}
+
 inline const var poly(var v, var power){
     return pack_expression(op_type::polynomial, v, power);
 }
@@ -224,6 +231,14 @@ inline const var inverse(var v){
 
 inline const var transpose(var v){
     return pack_expression(op_type::transpose, v);
+}
+
+inline const var add(var lhs, var rhs){
+    return pack_expression(op_type::scalar_add, lhs, rhs);
+}
+
+inline const var subtract(var lhs, var rhs){
+    return pack_expression(op_type::scalar_subtract, lhs, rhs);
 }
 
 inline const var multiply(var lhs, var rhs){

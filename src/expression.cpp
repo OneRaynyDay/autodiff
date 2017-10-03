@@ -17,23 +17,42 @@ MatrixXd _eval(op_type op, const std::vector<var>& operands){
             return operands[0].getValue().array() / operands[1].getValue().array();
         case op_type::exponent:
             return operands[0].getValue().array().exp();
+        case op_type::log:
+            return operands[0].getValue().array().log();
         case op_type::polynomial:
             return operands[0].getValue().array().pow(operands[1].getValue()(0,0));
         case op_type::dot:{
-            std::cout << "(" << operands[0].getValue().rows() << ", " << operands[0].getValue().cols() << ") " << operands[0].getValue() << std::endl;
-            std::cout << "(" << operands[1].getValue().rows() << ", " << operands[1].getValue().cols() << ") " << operands[1].getValue() << std::endl;
             MatrixXd res = operands[0].getValue() * operands[1].getValue();
-            std::cout << res << std::endl;
             return res;
         }
         case op_type::inverse:
             return operands[0].getValue().inverse();
         case op_type::transpose:
             return operands[0].getValue().transpose();
-        case op_type::scalar_multiply:
-            return operands[0].getValue().array() * operands[1].getValue()(0,0);
-        case op_type::scalar_divide:
-            return operands[0].getValue().array() / operands[1].getValue()(0,0);
+        case op_type::scalar_add:{
+            if(operands[0].getValue().size() == 1)
+                return operands[0].getValue()(0,0) + operands[1].getValue().array();
+            else
+                return operands[0].getValue().array() + operands[1].getValue()(0,0);
+         }
+        case op_type::scalar_subtract:{
+            if(operands[0].getValue().size() == 1)
+                return operands[0].getValue()(0,0) - operands[1].getValue().array();
+            else
+                return operands[0].getValue().array() - operands[1].getValue()(0,0);
+        }
+        case op_type::scalar_multiply:{
+            if(operands[0].getValue().size() == 1)
+                return operands[0].getValue()(0,0) * operands[1].getValue().array();
+            else
+                return operands[0].getValue().array() * operands[1].getValue()(0,0);
+        }
+        case op_type::scalar_divide:{
+            if(operands[0].getValue().size() == 1)
+                return operands[0].getValue()(0,0) / operands[1].getValue().array();
+            else
+                return operands[0].getValue().array() / operands[1].getValue()(0,0);
+        }
         case op_type::none:
             throw std::invalid_argument("Cannot have a non-leaf contain none-op.");
     }; 
@@ -47,15 +66,15 @@ MatrixXd _back_single(op_type op,
     switch(op){
         case op_type::plus: {
             if(op_idx == 0)
-                return dx.array() * ones_like(operands[0]).array();
+                return dx.array();
             else
-                return dx.array() * ones_like(operands[1]).array();
+                return dx.array();
         }
         case op_type::minus: {
             if(op_idx == 0)
-                return dx.array() * ones_like(operands[0]).array();
+                return dx.array();
             else
-                return dx.array() * -ones_like(operands[1]).array();
+                return dx.array() * -1;
         }
         case op_type::multiply: {
             return dx.array() * operands[(1-op_idx)].getValue().array();
@@ -68,6 +87,9 @@ MatrixXd _back_single(op_type op,
         }
         case op_type::exponent: {
             return dx.array() * operands[0].getValue().array().exp();
+        }
+        case op_type::log: {
+            return dx.array() * (1 / operands[0].getValue().array());
         }
         case op_type::polynomial: {
             if(op_idx == 0)
@@ -95,18 +117,40 @@ MatrixXd _back_single(op_type op,
         case op_type::transpose: {
             return dx.transpose();
         }
-        case op_type::scalar_multiply: {
-            if(op_idx == 0) // the matrix
-                return dx.array() * operands[1].getValue()(0,0);
+        case op_type::scalar_add: {
+            if(operands[op_idx].getValue().size() != 1) // the matrix
+                return dx;
             else // the scalar
-                return scalar((dx.array() * operands[0].getValue().array()).sum());
+                return scalar(dx.array().sum());
+        }
+        case op_type::scalar_subtract: {
+            MatrixXd res = (operands[op_idx].getValue().size() == 1) ? scalar(-1 * dx.array().sum()) : dx;
+            if(op_idx == 0)
+                return res;
+            else
+                return -1 * res.array();
+        }
+        case op_type::scalar_multiply: {
+            if(operands[op_idx].getValue().size() == 1) // the scalar
+                return scalar((dx.array() * operands[1-op_idx].getValue().array()).sum());
+            else // the matrix
+                return dx.array() * operands[1-op_idx].getValue()(0,0);
         }
         case op_type::scalar_divide: {
-            if(op_idx == 0) // the matrix
-                return dx.array() * (1 / operands[1].getValue()(0,0));
-            else // the scalar
-                return scalar((dx.array() * (-operands[0].getValue().array() / 
-                        operands[1].getValue().array().pow(2)(0,0))).sum());
+            if(op_idx == 0){ 
+                if(operands[0].getValue().size() == 1) // the scalar
+                    return scalar((dx.array() * (1 / operands[1].getValue().array())).sum());
+                else
+                    return dx.array() * (1 / operands[1].getValue()(0,0));
+            }
+            else{ 
+                if(operands[1].getValue().size() == 1)
+                    return scalar((dx.array() * (-operands[0].getValue().array() / 
+                            operands[1].getValue().array().pow(2)(0,0))).sum());
+                else
+                    return dx.array() * (-operands[0].getValue()(0,0) / 
+                        operands[1].getValue().array().pow(2));
+            }
         }
         case op_type::none: {
             throw std::invalid_argument("Cannot have a non-leaf contain none-op.");
@@ -132,9 +176,7 @@ std::vector<MatrixXd> _back(op_type op, const std::vector<var>& operands,
     std::vector<MatrixXd> derivatives;
     for(size_t i = 0; i < operands.size(); i++){
         derivatives.push_back(_back_single(op, dx, operands, i));
-        std::cout << "derivative : " << derivatives[i] << std::endl;
     }
-    std::cout << std::endl;
     return derivatives;
 }
 
@@ -204,7 +246,6 @@ MatrixXd expression::propagate(const std::vector<var>& leaves){
     std::unordered_map<var, int> explored; 
     for(const var& v : leaves){
         q.push(v);
-        std::cout << "Found leaf : " << v.getValue() << std::endl;
     }
     while(!q.empty()){
         var v = q.front();

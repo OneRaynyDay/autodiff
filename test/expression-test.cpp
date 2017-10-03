@@ -167,6 +167,26 @@ TEST_CASE( "et::expression can find the derivatives.", "[et::expression::propaga
         REQUIRE(m[a] == scalar(std::exp(3) + std::exp(3)*3));
         REQUIRE(m[b] == scalar(-1));
     }
+
+    SECTION( "et::expression evaluates log(A) + 3*log(A)" ) {
+        MatrixXd _A(2,3);
+        _A << 1,2,
+              3,4,
+              5,6;
+        et::var A(_A);
+        et::var root = et::log(A) + et::multiply(3, et::log(A));
+        et::expression exp(root);
+
+        std::unordered_map<et::var, MatrixXd> m = {
+            { A, et::zeros_like(A) },
+        };
+        exp.propagate();
+        exp.backpropagate(m);
+        MatrixXd _grad = 4 / _A.array();
+        std::cout << "expected GRAD : " << _grad << std::endl;
+        REQUIRE(m[A] == _grad);
+    }
+
     
     SECTION( "et::expression evaluates sigmoid(a)" ) {
         et::var a(3);
@@ -183,6 +203,29 @@ TEST_CASE( "et::expression can find the derivatives.", "[et::expression::propaga
         // precision is an issue here. So we make sure
         // that the diff in value isn't too large.
         REQUIRE(m[a](0,0)-grad < 1e-10);
+    }
+    
+    SECTION( "et::expression evaluates sigmoid(A)" ) {
+        MatrixXd _A(3,3);
+        _A << 1,2,3,
+              4,5,6,
+              7,8,9;
+        et::var A(_A);
+        et::var root = et::divide(1, et::add(1, et::exp(et::multiply(-1, A))));
+        et::expression exp(root);
+
+        std::unordered_map<et::var, MatrixXd> m = {
+            { A, et::zeros_like(A) },
+        };
+        MatrixXd val = exp.propagate();
+        exp.backpropagate(m);
+        MatrixXd _sigm = 1/(1+ ((-1)*_A.array()).exp());
+
+        REQUIRE(val == _sigm);
+        MatrixXd _grad = _sigm.array() * (1-_sigm.array());
+        // precision is an issue here. So we make sure
+        // that the diff in value isn't too large.
+        REQUIRE((m[A].array()-_grad.array()).sum() < 1e-10);
     }
 }
 
