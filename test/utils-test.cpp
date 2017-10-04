@@ -92,7 +92,7 @@ TEST_CASE("et::eval can back propagate on matrices with nonconstqualify optimize
           2;
     et::var X(_X), w(_w), y(_y);
     et::var intermediate = et::dot(X, w) - y;
-    et::var loss = et::multiply(1.0/3 , et::dot(et::transpose(intermediate), intermediate));
+    et::var loss = 1.0/3 * (et::dot(et::transpose(intermediate), intermediate));
     
     REQUIRE( et::eval(loss, true)(0,0) - (89.0+144)/3 <= 1e-10 );
 
@@ -110,12 +110,6 @@ TEST_CASE("et::eval can back propagate on matrices with nonconstqualify optimize
     // Linear regression has the loss function:
     // 1/N * sum[(Xw - y).^2]
     // Equivalent to: 1/N * (Xw - y)^T(Xw - y)
-    using et::divide;
-    using et::multiply;
-    using et::exp;
-    using et::log;
-    using et::subtract;
-    using et::transpose;
     MatrixXd _X(3,2); // 3 examples, 2 dimensions
     _X << 1, 2,
           3, 4,
@@ -128,8 +122,8 @@ TEST_CASE("et::eval can back propagate on matrices with nonconstqualify optimize
           0,
           1;
     et::var X(_X), w(_w), y(_y);
-    et::var sigm = divide(1, add(1, exp(multiply(-1, et::dot(X, w)))));
-    et::var loss = dot(transpose(y), log(sigm)) + dot(transpose(subtract(1, y)), log(subtract(1, sigm)));
+    et::var sigm = 1 / (1 + exp(-1 * et::dot(X, w)));
+    et::var loss = dot(transpose(y), log(sigm)) + dot(transpose(1-y), log(1-sigm));
 
     MatrixXd _A = _X*_w;
     MatrixXd _sigm = 1/(1+ ((-1)*_A.array()).exp());

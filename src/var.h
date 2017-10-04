@@ -8,6 +8,7 @@
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
+using Eigen::ArrayXd;
 
 namespace et{
 // forward declare class var
@@ -31,10 +32,6 @@ enum class op_type {
     dot,
     inverse,
     transpose,
-    scalar_add,
-    scalar_subtract,
-    scalar_multiply,
-    scalar_divide,
     none // no operators. leaf.
 };
 
@@ -233,20 +230,5 @@ inline const var transpose(var v){
     return pack_expression(op_type::transpose, v);
 }
 
-inline const var add(var lhs, var rhs){
-    return pack_expression(op_type::scalar_add, lhs, rhs);
-}
-
-inline const var subtract(var lhs, var rhs){
-    return pack_expression(op_type::scalar_subtract, lhs, rhs);
-}
-
-inline const var multiply(var lhs, var rhs){
-    return pack_expression(op_type::scalar_multiply, lhs, rhs);
-}
-
-inline const var divide(var lhs, var rhs){
-    return pack_expression(op_type::scalar_divide, lhs, rhs);
-}
 }
 

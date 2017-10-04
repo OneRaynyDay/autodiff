@@ -4,57 +4,66 @@
 
 namespace et{
 
+bool is_scalar(const var& v){ return v.getValue().size() == 1; }
+double sval(const var& v){ return v.getValue()(0,0); }
+MatrixXd mval(const var& v){ return v.getValue(); }
+
 // Helper function for recursive propagation
 MatrixXd _eval(op_type op, const std::vector<var>& operands){
     switch(op){
-        case op_type::plus:
-            return operands[0].getValue().array() + operands[1].getValue().array();
-        case op_type::minus:
-            return operands[0].getValue().array() - operands[1].getValue().array();
-        case op_type::multiply:
-            return operands[0].getValue().array() * operands[1].getValue().array();
-        case op_type::divide:
-            return operands[0].getValue().array() / operands[1].getValue().array();
-        case op_type::exponent:
-            return operands[0].getValue().array().exp();
-        case op_type::log:
-            return operands[0].getValue().array().log();
-        case op_type::polynomial:
-            return operands[0].getValue().array().pow(operands[1].getValue()(0,0));
+        case op_type::plus:{
+            if(is_scalar(operands[0]))
+                return sval(operands[0]) + mval(operands[1]).array();
+            else if(is_scalar(operands[1]))
+                return mval(operands[0]).array() + sval(operands[1]);
+            else
+                return mval(operands[0]).array() + mval(operands[1]).array();
+        }
+        case op_type::minus:{
+            if(is_scalar(operands[0]))
+                return sval(operands[0]) - mval(operands[1]).array();
+            else if(is_scalar(operands[1]))
+                return mval(operands[0]).array() - sval(operands[1]);
+            else
+                return mval(operands[0]).array() - mval(operands[1]).array();
+        }
+        case op_type::multiply:{
+            if(is_scalar(operands[0]))
+                return sval(operands[0]) * mval(operands[1]).array();
+            else if(is_scalar(operands[1]))
+                return mval(operands[0]).array() * sval(operands[1]);
+            else
+                return mval(operands[0]).array() * mval(operands[1]).array();
+        }
+        case op_type::divide:{
+            if(is_scalar(operands[0]))
+                return sval(operands[0]) / mval(operands[1]).array();
+            else if(is_scalar(operands[1]))
+                return mval(operands[0]).array() / sval(operands[1]);
+            else
+                return mval(operands[0]).array() / mval(operands[1]).array();
+        }
+        case op_type::exponent:{
+            return mval(operands[0]).array().exp();
+        }
+        case op_type::log:{
+            return mval(operands[0]).array().log();
+        }
+        case op_type::polynomial:{
+            return mval(operands[0]).array().pow(sval(operands[1]));
+        }
         case op_type::dot:{
-            MatrixXd res = operands[0].getValue() * operands[1].getValue();
-            return res;
+            return mval(operands[0]) * mval(operands[1]);
         }
-        case op_type::inverse:
-            return operands[0].getValue().inverse();
-        case op_type::transpose:
-            return operands[0].getValue().transpose();
-        case op_type::scalar_add:{
-            if(operands[0].getValue().size() == 1)
-                return operands[0].getValue()(0,0) + operands[1].getValue().array();
-            else
-                return operands[0].getValue().array() + operands[1].getValue()(0,0);
-         }
-        case op_type::scalar_subtract:{
-            if(operands[0].getValue().size() == 1)
-                return operands[0].getValue()(0,0) - operands[1].getValue().array();
-            else
-                return operands[0].getValue().array() - operands[1].getValue()(0,0);
+        case op_type::inverse:{
+            return mval(operands[0]).inverse();
         }
-        case op_type::scalar_multiply:{
-            if(operands[0].getValue().size() == 1)
-                return operands[0].getValue()(0,0) * operands[1].getValue().array();
-            else
-                return operands[0].getValue().array() * operands[1].getValue()(0,0);
+        case op_type::transpose:{
+            return mval(operands[0]).transpose();
         }
-        case op_type::scalar_divide:{
-            if(operands[0].getValue().size() == 1)
-                return operands[0].getValue()(0,0) / operands[1].getValue().array();
-            else
-                return operands[0].getValue().array() / operands[1].getValue()(0,0);
-        }
-        case op_type::none:
+        case op_type::none:{
             throw std::invalid_argument("Cannot have a non-leaf contain none-op.");
+        }
     }; 
 }
 
@@ -65,44 +74,73 @@ MatrixXd _back_single(op_type op,
         int op_idx){
     switch(op){
         case op_type::plus: {
-            if(op_idx == 0)
-                return dx.array();
-            else
-                return dx.array();
+            if(!is_scalar(operands[op_idx])) 
+                return dx;
+            else 
+                return scalar(dx.array().sum());
         }
         case op_type::minus: {
+            MatrixXd res = is_scalar(operands[op_idx]) ? scalar(dx.array().sum()) : dx;
             if(op_idx == 0)
-                return dx.array();
+                return res;
             else
-                return dx.array() * -1;
+                return -1 * res.array();
         }
         case op_type::multiply: {
-            return dx.array() * operands[(1-op_idx)].getValue().array();
+            if(is_scalar(operands[op_idx])) 
+                return scalar((dx.array() * mval(operands[1-op_idx]).array()).sum());
+            else if(is_scalar(operands[1-op_idx]))
+                return dx.array() * sval(operands[1-op_idx]);
+            else 
+                return dx.array() * 
+                    mval(operands[(1-op_idx)]).array();
         }
         case op_type::divide: {
-            if(op_idx == 0)
-                return dx.array() * (1 / operands[1].getValue().array());
-            else
-                return dx.array() * (-operands[0].getValue().array() / operands[1].getValue().array().pow(2));
+            if(op_idx == 0){
+                if(is_scalar(operands[0])) // the scalar
+                    return scalar((dx.array() * (1 / mval(operands[1]).array())).sum());
+                else if(is_scalar(operands[1]))
+                    return dx.array() * (1 / sval(operands[1]));
+                else
+                    return dx.array() * 
+                        (1 / mval(operands[1]).array());
+            }
+            else{
+                if(is_scalar(operands[1]))
+                    return scalar((dx.array() * 
+                            (-mval(operands[0]).array() / 
+                             std::pow(sval(operands[1]),2))).sum());
+                else if(is_scalar(operands[0]))
+                    return dx.array() * (-sval(operands[0]) / 
+                        mval(operands[1]).array().pow(2));
+                else
+                    return dx.array() * 
+                        (-mval(operands[0]).array() / 
+                         mval(operands[1]).array().pow(2));
+            }
         }
         case op_type::exponent: {
-            return dx.array() * operands[0].getValue().array().exp();
+            return dx.array() * 
+                mval(operands[0]).array().exp();
+
         }
         case op_type::log: {
-            return dx.array() * (1 / operands[0].getValue().array());
+            return dx.array() * 
+                (1 / mval(operands[0]).array());
         }
         case op_type::polynomial: {
             if(op_idx == 0)
-                return dx.array() * operands[0].getValue().array().pow(operands[1].getValue()(0,0)-1) * 
-                    operands[1].getValue()(0,0);
+                return dx.array() * 
+                    mval(operands[0]).array().pow(sval(operands[1])-1) * 
+                        sval(operands[1]);
             else
                 return scalar(0); // we don't support exponents other than e.
         }
         case op_type::dot: {
             if(op_idx == 0)
-                return dx * operands[1].getValue().transpose();
+                return dx * mval(operands[1]).transpose();
             else
-                return operands[0].getValue().transpose() * dx;
+                return mval(operands[0]).transpose() * dx;
         }
         case op_type::inverse: {
             // (I)' = (AA^{-1})' = A(A^{-1}') + A'(A^{-1})
@@ -116,41 +154,6 @@ MatrixXd _back_single(op_type op,
         }
         case op_type::transpose: {
             return dx.transpose();
-        }
-        case op_type::scalar_add: {
-            if(operands[op_idx].getValue().size() != 1) // the matrix
-                return dx;
-            else // the scalar
-                return scalar(dx.array().sum());
-        }
-        case op_type::scalar_subtract: {
-            MatrixXd res = (operands[op_idx].getValue().size() == 1) ? scalar(-1 * dx.array().sum()) : dx;
-            if(op_idx == 0)
-                return res;
-            else
-                return -1 * res.array();
-        }
-        case op_type::scalar_multiply: {
-            if(operands[op_idx].getValue().size() == 1) // the scalar
-                return scalar((dx.array() * operands[1-op_idx].getValue().array()).sum());
-            else // the matrix
-                return dx.array() * operands[1-op_idx].getValue()(0,0);
-        }
-        case op_type::scalar_divide: {
-            if(op_idx == 0){ 
-                if(operands[0].getValue().size() == 1) // the scalar
-                    return scalar((dx.array() * (1 / operands[1].getValue().array())).sum());
-                else
-                    return dx.array() * (1 / operands[1].getValue()(0,0));
-            }
-            else{ 
-                if(operands[1].getValue().size() == 1)
-                    return scalar((dx.array() * (-operands[0].getValue().array() / 
-                            operands[1].getValue().array().pow(2)(0,0))).sum());
-                else
-                    return dx.array() * (-operands[0].getValue()(0,0) / 
-                        operands[1].getValue().array().pow(2));
-            }
         }
         case op_type::none: {
             throw std::invalid_argument("Cannot have a non-leaf contain none-op.");

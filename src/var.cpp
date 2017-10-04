@@ -39,10 +39,6 @@ int numOpArgs(op_type op){
         { op_type::dot, 2 },
         { op_type::inverse, 1 },
         { op_type::transpose, 1 },
-        { op_type::scalar_add, 2 },
-        { op_type::scalar_subtract, 2 },
-        { op_type::scalar_multiply, 2 },
-        { op_type::scalar_divide, 2 },
         { op_type::none, 0 },
     };
     return op_args.find(op)->second;

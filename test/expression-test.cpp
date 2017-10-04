@@ -174,7 +174,7 @@ TEST_CASE( "et::expression can find the derivatives.", "[et::expression::propaga
               3,4,
               5,6;
         et::var A(_A);
-        et::var root = et::log(A) + et::multiply(3, et::log(A));
+        et::var root = et::log(A) + 3 * et::log(A);
         et::expression exp(root);
 
         std::unordered_map<et::var, MatrixXd> m = {
@@ -211,7 +211,7 @@ TEST_CASE( "et::expression can find the derivatives.", "[et::expression::propaga
               4,5,6,
               7,8,9;
         et::var A(_A);
-        et::var root = et::divide(1, et::add(1, et::exp(et::multiply(-1, A))));
+        et::var root = 1 / (1 + et::exp(-1 * A));
         et::expression exp(root);
 
         std::unordered_map<et::var, MatrixXd> m = {
