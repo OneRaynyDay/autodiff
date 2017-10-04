@@ -1,9 +1,12 @@
 FLAGS=-Wall -g -Wc++11-extensions -std=c++11
 
+# MAIN BUILD
+main: all
+	g++ $(FLAGS) *.o -o main
+all: src/expression.cpp src/var.cpp src/utils.cpp
+	g++ $(FLAGS) -c src/*.cpp 
+
 # RUN
-build: expression.o main.o var.o
-	g++ $(FLAGS) -o build/main build/main.o build/var.o build/expression.o
-	build/main
 test: utils-test var-test expression-test utils-test
 	build/var-test
 	build/expression-test
@@ -37,10 +40,7 @@ utils-test: test/utils-test.cpp test/expression-test.cpp src/expression.cpp src/
 		src/var.cpp \
 		-o build/utils-test
 
-# MAIN BUILD
-main.o: src/main.cpp
-	g++ $(FLAGS) -c src/main.cpp -o build/main.o
-
 # CLEAN/DIST
 clean:
 	rm -rf build/* 
+	rm -rf *.o
