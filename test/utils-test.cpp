@@ -70,7 +70,12 @@ TEST_CASE("et::back can back propagate with nonconstqualify optimize.", "[et::ba
     };
 
     et::eval(fx, true);
-    et::back(fx, m, {et::back_flags::const_qualify});
+
+    std::vector<et::var> leaves = {x};
+    et::expression exp(fx);
+    std::unordered_set<et::var> leaf_set = exp.findNonConsts(leaves);
+
+    et::back(exp, m, leaf_set);
 
     REQUIRE(m[x](0,0) - ((3.0/4)*std::exp(7.5*0.5 + 2.5)) < 1e-10);
 }
@@ -101,7 +106,11 @@ TEST_CASE("et::eval can back propagate on matrices with nonconstqualify optimize
         { w, zeros_like(w) },
     };
     
-    et::back(loss, m, {et::back_flags::const_qualify});
+    std::vector<et::var> leaves = {w};
+    et::expression exp(loss);
+    std::unordered_set<var> leaf_set = exp.findNonConsts(leaves);
+    
+    et::back(exp, m, leaf_set);
 
     REQUIRE( m[w] == expected_grad );
 }
@@ -137,7 +146,12 @@ TEST_CASE("et::eval can back propagate on matrices with nonconstqualify optimize
         { w, zeros_like(w) },
     };
 
-    et::back(loss, m, {et::back_flags::const_qualify});
+    
+    std::vector<et::var> leaves = {w};
+    et::expression exp(loss);
+    std::unordered_set<var> leaf_set = exp.findNonConsts(leaves);
+    
+    et::back(exp, m, leaf_set);
 
     REQUIRE( m[w] == expected_grad );
 }

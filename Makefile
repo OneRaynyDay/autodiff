@@ -1,4 +1,4 @@
-FLAGS=-Wall -g -Wc++11-extensions -std=c++11
+FLAGS=-Wall -g -Wc++14-extensions -std=c++14
 
 # MAIN BUILD
 main: all

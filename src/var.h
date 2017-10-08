@@ -32,6 +32,7 @@ enum class op_type {
     dot,
     inverse,
     transpose,
+    sum,
     none // no operators. leaf.
 };
 
@@ -228,6 +229,10 @@ inline const var inverse(var v){
 
 inline const var transpose(var v){
     return pack_expression(op_type::transpose, v);
+}
+
+inline const var sum(var v){
+    return pack_expression(op_type::sum, v);
 }
 
 }

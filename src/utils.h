@@ -26,6 +26,7 @@ enum class back_flags {
     const_qualify
 };
 
-void back(const var&, std::unordered_map<var, MatrixXd>&, std::set<back_flags> flags = {});
+void back(const var&, std::unordered_map<var, MatrixXd>&);
+void back(expression&, std::unordered_map<var, MatrixXd>&, const std::unordered_set<var>&);
 
 }

@@ -61,6 +61,9 @@ MatrixXd _eval(op_type op, const std::vector<var>& operands){
         case op_type::transpose:{
             return mval(operands[0]).transpose();
         }
+        case op_type::sum:{
+            return scalar(mval(operands[0]).array().sum());
+        }
         case op_type::none:{
             throw std::invalid_argument("Cannot have a non-leaf contain none-op.");
         }
@@ -155,6 +158,9 @@ MatrixXd _back_single(op_type op,
         case op_type::transpose: {
             return dx.transpose();
         }
+        case op_type::sum: {
+            return sval(dx) * ones_like(operands[0]).array();
+        }
         case op_type::none: {
             throw std::invalid_argument("Cannot have a non-leaf contain none-op.");
         }
@@ -162,11 +168,11 @@ MatrixXd _back_single(op_type op,
 }
 
 std::vector<MatrixXd> _back(op_type op, const std::vector<var>& operands,
-        const std::vector<bool>& nonconsts,
+        const std::unordered_set<var>& nonconsts,
         const MatrixXd& dx){
     std::vector<MatrixXd> derivatives;
     for(size_t i = 0; i < operands.size(); i++){
-        if(!nonconsts[i])
+        if(nonconsts.find(operands[i]) == nonconsts.end())
             derivatives.push_back(zeros_like(operands[i])); // no gradient flow.
         else
             derivatives.push_back(_back_single(op, dx, operands, i));
@@ -347,7 +353,7 @@ void expression::backpropagate(std::unordered_map<var, MatrixXd>& leaves,
         if(nonconsts.find(v) == nonconsts.end())
             continue;
         std::vector<var>& children = v.getChildren();
-        std::vector<MatrixXd> child_derivs = _back(v.getOp(), children, derivatives[v]);
+        std::vector<MatrixXd> child_derivs = _back(v.getOp(), children, nonconsts, derivatives[v]);
         for(size_t i = 0; i < children.size(); i++){
             auto child = children[i];
             if(explored.find(child) == explored.end())

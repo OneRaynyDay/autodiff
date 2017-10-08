@@ -11,21 +11,16 @@ MatrixXd eval(var& root, bool iter){
 }
 
 void back(const var& root, 
-        std::unordered_map<var, MatrixXd>& derivative,
-        std::set<back_flags> flags){
+        std::unordered_map<var, MatrixXd>& derivative){
     expression exp(root);
-    if(flags.find(back_flags::const_qualify) != flags.end()){
-        std::vector<var> leaves;
-        for(auto p : derivative){
-            leaves.push_back(p.first); 
-        }
-        std::unordered_set<var> s = exp.findNonConsts(leaves);
-        exp.backpropagate(derivative, s);
-    }
-    else{ 
-        exp.backpropagate(derivative);
-    }
+    exp.backpropagate(derivative);
 }
 
+void back(expression& exp, 
+        std::unordered_map<var, MatrixXd>& derivative,
+        const std::unordered_set<var>& leaves)
+{
+    exp.backpropagate(derivative, leaves);
+}
 
 }
